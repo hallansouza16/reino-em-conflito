@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REINO EM CONFLITO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <!-- SISTEMA DE CONFIGURAÇÕES -->
+    <link rel="stylesheet" href="css/settings.css">
+    <!-- SISTEMA DE EFEITOS VISUAIS -->
+    <link rel="stylesheet" href="css/effects.css">
+    <!-- ESTILOS DE COMBATE (se existir) -->
+    <link rel="stylesheet" href="css/combat-styles.css">
+</head>
+<body>
+    <div class="background-overlay"></div>
+    
+    <div class="menu-container">
+        <div class="title">REINO EM CONFLITO</div>
+        <div class="menu-subtitle">Escolha seu modo de jogo</div>
+        
+        <div class="menu-options">
+            <button class="menu-btn singleplayer-btn" onclick="window.location.href='singleplayer.html'">
+                <span class="btn-icon">👑</span>
+                <span class="btn-text">Singleplayer</span>
+                <span class="btn-desc">Jogue contra a IA</span>
+            </button>
+            
+            <button class="menu-btn multiplayer-btn" onclick="window.location.href='multiplayer.html'">
+                <span class="btn-icon">⚔️</span>
+                <span class="btn-text">Multiplayer</span>
+                <span class="btn-desc">Jogue contra outros jogadores</span>
+            </button>
+        </div>
+        
+        <div class="menu-footer">
+            <p>Um jogo de estratégia medieval</p>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <!-- SISTEMAS DE ÁUDIO E EFEITOS -->
+    <script type="module" src="js/audio-system.js"></script>
+    <script type="module" src="js/visual-effects.js"></script>
+    <script type="module" src="js/game-integration.js"></script>
+    <script type="module" src="js/settings.js"></script>
+</body>
+</html>

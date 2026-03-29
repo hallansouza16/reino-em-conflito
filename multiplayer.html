@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REINO EM CONFLITO - Multiplayer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <!-- SISTEMA DE CONFIGURAÇÕES -->
+    <link rel="stylesheet" href="css/settings.css">
+    <!-- SISTEMA DE EFEITOS VISUAIS -->
+    <link rel="stylesheet" href="css/effects.css">
+</head>
+<body>
+    <div class="background-overlay"></div>
+    
+    <!-- Botão voltar -->
+    <button class="back-btn" onclick="window.location.href='index.html'">← Voltar ao Menu</button>
+
+    <div class="game-container" id="game-container">
+        <div class="title">REINO EM CONFLITO - MULTIPLAYER</div>
+
+        <!-- Seleção de Personagem -->
+        <div id="selection-screen">
+            <div class="selection-panel">
+                <h2 style="color: var(--color-gold);">ESCOLHA SEU PERSONAGEM</h2>
+                <p>Selecione seu líder para definir seus atributos iniciais e sua habilidade passiva única.</p>
+
+                <div class="character-grid" id="character-grid"></div>
+
+                <button id="continue-to-lobby-btn" class="btn-primary" disabled>CONTINUAR PARA MULTIPLAYER</button>
+            </div>
+        </div>
+
+        <!-- Lobby -->
+        <div id="lobby-screen" style="display: none;">
+            <div class="lobby-container">
+                <h1>REINO EM CONFLITO - Multiplayer</h1>
+                <p>Entre em uma sala para duelar!</p>
+
+                <button id="create-room-btn" class="btn-primary">Criar Sala</button>
+
+                <h2>Salas Disponíveis</h2>
+                <div id="room-list"></div>
+            </div>
+        </div>
+
+        <!-- Espera -->
+        <div id="waiting-screen" style="display: none;">
+            <div class="waiting-container">
+                <h2>Sala: <span id="room-id-display"></span></h2>
+                <p>Aguardando oponente...</p>
+                <div class="spinner"></div>
+            </div>
+        </div>
+
+        <!-- Jogo -->
+        <div id="game-screen" style="display: none;">
+
+        <!-- Loja Multiplayer -->
+        <div id="shop-modal-overlay">
+            <div id="shop-modal">
+                <button id="shop-close-button">X</button>
+                <h2>🛒 LOJA DE MELHORIAS REAIS 🛒</h2>
+                <p>Compre melhorias permanentes para o seu reino usando <strong>Briks</strong>, obtidos ao vencer Guerras.</p>
+                <div class="upgrade-grid" id="upgrade-grid"></div>
+            </div>
+        </div>
+            <div class="main-section">
+                <!-- Jogador 1 -->
+                <div class="player-panel">
+                    <div id="p1-turn-indicator" class="turn-indicator" style="display: none;">SUA VEZ</div>
+                    <div class="avatar" id="p1-avatar">
+                        <div class="coin-display-tile" id="p1-currencies-display"></div>
+                    </div>
+                    <div id="p1-status-display" class="status-display"></div>
+                    <div class="character-name" id="p1-character-name"></div>
+                    
+                    <div class="stats-group">
+                        <div class="stat-bar"><div class="stat-icon">⚡ AP</div><div class="bar-container"><div id="p1-ap-fill" class="bar-fill ap-fill"></div></div><span id="p1-ap-value" class="stat-value"></span></div>
+                        <div class="stat-bar"><div class="stat-icon">⚔️ EX.</div><div class="bar-container"><div id="p1-army-fill" class="bar-fill army-fill"></div></div><span id="p1-army-value" class="stat-value"></span></div>
+                        <div class="stat-bar"><div class="stat-icon">🍎 COM.</div><div class="bar-container"><div id="p1-food-fill" class="bar-fill food-fill"></div></div><span id="p1-food-value" class="stat-value"></span></div>
+                        <div class="stat-bar"><div class="stat-icon">✨ INF.</div><div class="bar-container"><div id="p1-influence-fill" class="bar-fill influence-fill"></div></div><span id="p1-influence-value" class="stat-value"></span></div>
+                        <div class="stat-bar"><div class="stat-icon">🔥 INST.</div><div class="bar-container"><div id="p1-instability-fill" class="bar-fill instability-fill"></div></div><span id="p1-instability-value" class="stat-value"></span></div>
+                        <div class="stat-bar" id="p1-cooldown-stat"><div class="stat-icon">⛏️ CD.</div><div class="bar-container"><div id="p1-mine-cooldown-fill" class="bar-fill cooldown-fill"></div></div><span id="p1-mine-cooldown-value" class="stat-value"></span></div>
+                    </div>
+                </div>
+
+                <!-- Centro -->
+                <div class="center-board">
+                    <div class="board-cell" id="global-coin-display">
+                        <span style="font-size: 2em; line-height: 1; color: var(--color-gold);">💰</span>
+                        <p style="margin: 0; font-weight: 700;">TURNO ATUAL</p>
+                        <span id="turn-count-value">1</span>
+                    </div>
+                    <div class="board-cell">
+                        <p style="margin: 0; font-weight: 700;">CONDIÇÃO DE REBELIÃO:</p>
+                        <p style="margin: 0; font-size: 0.9em;"><span id="rebellion-condition"></span></p>
+                    </div>
+                </div>
+
+                <!-- Jogador 2 -->
+                <div class="player-panel">
+                    <div id="p2-turn-indicator" class="turn-indicator" style="display: none;">VEZ DO OP.</div>
+                    <div class="avatar" id="p2-avatar">
+                        <div class="coin-display-tile" id="p2-currencies-display"></div>
+                    </div>
+                    <div id="p2-status-display" class="status-display"></div>
+                    <div class="character-name" id="p2-character-name"></div>
+                    
+                    <div class="stats-group">
+                        <div class="stat-bar"><div class="stat-icon">⚡ AP</div><div class="bar-container"><div id="p2-ap-fill" class="bar-fill ap-fill"></div></div><span id="p2-ap-value" class="stat-value"></span></div>
+                        <div class="stat-bar"><div class="stat-icon">⚔️ EX.</div><div class="bar-container"><div id="p2-army-fill" class="bar-fill army-fill"></div></div><span id="p2-army-value" class="stat-value"></span></div>
+                        <div class="stat-bar"><div class="stat-icon">🍎 COM.</div><div class="bar-container"><div id="p2-food-fill" class="bar-fill food-fill"></div></div><span id="p2-food-value" class="stat-value"></span></div>
+                        <div class="stat-bar"><div class="stat-icon">✨ INF.</div><div class="bar-container"><div id="p2-influence-fill" class="bar-fill influence-fill"></div></div><span id="p2-influence-value" class="stat-value"></span></div>
+                        <div class="stat-bar"><div class="stat-icon">🔥 INST.</div><div class="bar-container"><div id="p2-instability-fill" class="bar-fill instability-fill"></div></div><span id="p2-instability-value" class="stat-value"></span></div>
+                        <div class="stat-bar" id="p2-cooldown-stat"><div class="stat-icon">⛏️ CD.</div><div class="bar-container"><div id="p2-mine-cooldown-fill" class="bar-fill cooldown-fill"></div></div><span id="p2-mine-cooldown-value" class="stat-value"></span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ações -->
+            <div class="actions-container">
+                <h2>Ações do Reino (Custo: 1 AP por Ação)</h2>
+                <button id="mine-button" class="action-button">MINERAR E PLANTAR (1 AP)</button>
+                <button id="recruit-button" class="action-button">RECRUTAR EXÉRCITO</button>
+                <button id="fortify-button" class="action-button">FORTIFICAR MURALHAS</button>
+                <button id="war-button" class="war-button" disabled>DECLARAR GUERRA!</button>
+                <button id="end-turn-button" class="action-button">PASSAR A VEZ (0 AP)</button>
+            </div>
+
+            <!-- Loja no Multiplayer -->
+            <button id="shop-button">🛒 LOJA DE MELHORIAS</button>
+
+            <!-- Mercado -->
+            <h2 style="text-align: center; margin-bottom: 0; color: var(--color-gold);">Mercado de Cartas (Custo: 1 AP por Compra)</h2>
+            <div class="card-market" id="card-market"></div>
+
+            <!-- Conquistas Multiplayer -->
+            <div id="achievements-display">
+                <h3>Conquistas do Jogo</h3>
+            </div>
+
+            <!-- Mensagem -->
+            <div id="game-message"></div>
+            <div id="waiting-turn-overlay" class="waiting-overlay">
+                <p>Aguardando turno do oponente...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fim de Jogo -->
+    <div id="game-over-screen" class="screen">
+        <div class="game-over-container">
+            <h2 id="winner-title"></h2>
+            <p id="reason-text"></p>
+            <button id="back-to-lobby-btn" class="btn-primary">Voltar ao Menu</button>
+        </div>
+    </div>
+
+    <!-- Socket.IO para Multiplayer -->
+    <script src="/socket.io/socket.io.js"></script>
+    
+    <!-- SISTEMAS DE ÁUDIO E EFEITOS -->
+    <script type="module" src="js/audio-system.js"></script>
+    <script type="module" src="js/visual-effects.js"></script>
+    <script type="module" src="js/game-integration.js"></script>
+    <script type="module" src="js/settings.js"></script>
+    <script type="module" src="js/multiplayer.js"></script>
+</body>
+</html>

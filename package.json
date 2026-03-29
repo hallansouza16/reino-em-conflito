@@ -1,0 +1,25 @@
+{
+  "name": "multiplayer-game-server",
+  "version": "1.0.0",
+  "description": "Servidor multiplayer para jogo estratégico",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server/serve.js",
+    "dev": "node server/server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "keywords": [
+    "multiplayer",
+    "game",
+    "socket.io",
+    "strategy"
+  ],
+  "author": "Seu Nome",
+  "license": "MIT"
+}

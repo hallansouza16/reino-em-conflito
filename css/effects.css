@@ -1,0 +1,807 @@
+/* css/effects.css - SISTEMA COMPLETO DE EFEITOS VISUAIS MEDIEVAIS */
+
+/* ===== VARIÁVEIS GLOBAIS PARA EFEITOS ===== */
+:root {
+    /* Intensidade dos efeitos (controlada via JavaScript) */
+    --effects-intensity: 0.8;
+    --particle-intensity: 0.8;
+    --glow-intensity: 1;
+    --shake-intensity: 1;
+    
+    /* Cores temáticas medievais */
+    --effect-gold: #f1c40f;
+    --effect-gold-glow: rgba(241, 196, 15, 0.6);
+    --effect-fire: #ff6a00;
+    --effect-fire-glow: rgba(255, 106, 0, 0.5);
+    --effect-magic: #9b55b5;
+    --effect-magic-glow: rgba(155, 85, 181, 0.5);
+    --effect-victory: #27ae60;
+    --effect-victory-glow: rgba(39, 174, 96, 0.5);
+    --effect-defeat: #c0392b;
+    --effect-defeat-glow: rgba(192, 57, 43, 0.5);
+    --effect-water: #3498db;
+    --effect-water-glow: rgba(52, 152, 219, 0.5);
+    
+    /* Tamanhos e durações */
+    --particle-size: 6px;
+    --particle-duration: 1s;
+    --glow-duration: 2s;
+    --shake-duration: 0.5s;
+}
+
+/* ===== CLASSES DE EFEITO PRINCIPAIS ===== */
+
+/* Efeito de Pulsação Dourada (Ouro/ Tesouro) */
+.effect-pulse-gold {
+    animation: pulseGold calc(var(--glow-duration) * 2) ease-in-out;
+    animation-iteration-count: calc(2 * var(--effects-intensity));
+}
+
+/* Efeito de Batalha - Tremer */
+.effect-shake-battle {
+    animation: shakeBattle var(--shake-duration) ease-in-out;
+    animation-iteration-count: calc(1 + var(--shake-intensity));
+}
+
+/* Efeito de Flutuação Mágica */
+.effect-float-magic {
+    animation: floatMagic calc(var(--glow-duration) * 1.5) ease-in-out;
+}
+
+/* Efeito de Brilho de Tesouro */
+.effect-sparkle-treasure {
+    animation: sparkleTreasure var(--glow-duration) ease-in-out;
+}
+
+/* Efeito de Glória da Vitória */
+.effect-glow-victory {
+    animation: glowVictory calc(var(--glow-duration) * 2) ease-in-out;
+}
+
+/* Efeito de Fumaça da Rebelião */
+.effect-smoke-rebellion {
+    animation: smokeRebellion calc(var(--glow-duration) * 1.5) ease-out;
+}
+
+/* Efeito de Onda em Cartas */
+.effect-ripple-card {
+    animation: rippleCard var(--particle-duration) ease-out;
+}
+
+/* Efeito de Escala em Melhorias */
+.effect-scale-upgrade {
+    animation: scaleUpgrade calc(var(--particle-duration) * 0.8) ease-out;
+}
+
+/* Efeito de Dano em Combate */
+.effect-combat-damage {
+    animation: combatDamage var(--shake-duration) ease-out;
+}
+
+/* Efeito de Cura/ Curação */
+.effect-healing {
+    animation: healingEffect var(--glow-duration) ease-in-out;
+}
+
+/* Efeito de Seleção Real */
+.effect-royal-select {
+    animation: royalSelect calc(var(--glow-duration) * 1.2) ease-out;
+}
+
+/* Efeito de Aura de Poder */
+.effect-power-aura {
+    animation: powerAura calc(var(--glow-duration) * 3) ease-in-out infinite;
+}
+
+/* Efeito de Portal Mágico */
+.effect-magic-portal {
+    animation: magicPortal calc(var(--glow-duration) * 2) ease-in-out;
+}
+
+/* ===== ANIMAÇÕES PRINCIPAIS ===== */
+
+/* Pulsação Dourada - Para tesouros, moedas, recursos */
+@keyframes pulseGold {
+    0%, 100% { 
+        box-shadow: 
+            0 0 calc(5px * var(--effects-intensity)) var(--effect-gold),
+            inset 0 0 calc(10px * var(--effects-intensity)) transparent;
+        transform: scale(1);
+    }
+    50% { 
+        box-shadow: 
+            0 0 calc(20px * var(--effects-intensity)) var(--effect-gold),
+            0 0 calc(30px * var(--effects-intensity)) var(--effect-gold-glow),
+            inset 0 0 calc(15px * var(--effects-intensity)) rgba(241, 196, 15, 0.2);
+        transform: scale(calc(1 + (0.05 * var(--effects-intensity))));
+    }
+}
+
+/* Batalha - Tremer elementos durante combate */
+@keyframes shakeBattle {
+    0%, 100% { 
+        transform: translateX(0) translateY(0) rotate(0); 
+    }
+    10%, 30%, 50%, 70%, 90% { 
+        transform: 
+            translateX(calc(-8px * var(--shake-intensity))) 
+            translateY(calc(-4px * var(--shake-intensity)))
+            rotate(calc(-1deg * var(--shake-intensity))); 
+    }
+    20%, 40%, 60%, 80% { 
+        transform: 
+            translateX(calc(8px * var(--shake-intensity))) 
+            translateY(calc(4px * var(--shake-intensity)))
+            rotate(calc(1deg * var(--shake-intensity))); 
+    }
+}
+
+/* Flutuação Mágica - Para efeitos sobrenaturais */
+@keyframes floatMagic {
+    0%, 100% { 
+        transform: translateY(0) scale(1) rotate(0);
+        filter: brightness(1) drop-shadow(0 0 5px var(--effect-magic));
+    }
+    33% { 
+        transform: translateY(calc(-10px * var(--effects-intensity))) scale(1.05) rotate(2deg);
+        filter: brightness(1.2) drop-shadow(0 0 15px var(--effect-magic));
+    }
+    66% { 
+        transform: translateY(calc(-5px * var(--effects-intensity))) scale(1.03) rotate(-2deg);
+        filter: brightness(1.1) drop-shadow(0 0 10px var(--effect-magic));
+    }
+}
+
+/* Brilho de Tesouro - Para recursos valiosos */
+@keyframes sparkleTreasure {
+    0%, 100% { 
+        filter: 
+            brightness(1) 
+            drop-shadow(0 0 calc(5px * var(--effects-intensity)) var(--effect-gold))
+            contrast(1);
+    }
+    25% { 
+        filter: 
+            brightness(1.3) 
+            drop-shadow(0 0 calc(15px * var(--effects-intensity)) var(--effect-gold))
+            contrast(1.2);
+    }
+    50% { 
+        filter: 
+            brightness(1.6) 
+            drop-shadow(0 0 calc(25px * var(--effects-intensity)) var(--effect-gold))
+            contrast(1.4);
+    }
+    75% { 
+        filter: 
+            brightness(1.3) 
+            drop-shadow(0 0 calc(15px * var(--effects-intensity)) var(--effect-gold))
+            contrast(1.2);
+    }
+}
+
+/* Glória da Vitória - Para vitórias e conquistas */
+@keyframes glowVictory {
+    0%, 100% { 
+        background: rgba(39, 174, 96, calc(0.1 * var(--effects-intensity)));
+        box-shadow: 
+            0 0 calc(10px * var(--effects-intensity)) var(--effect-victory),
+            inset 0 0 calc(20px * var(--effects-intensity)) rgba(39, 174, 96, 0.1);
+    }
+    50% { 
+        background: rgba(39, 174, 96, calc(0.3 * var(--effects-intensity)));
+        box-shadow: 
+            0 0 calc(25px * var(--effects-intensity)) var(--effect-victory),
+            0 0 calc(40px * var(--effects-intensity)) var(--effect-victory-glow),
+            inset 0 0 calc(30px * var(--effects-intensity)) rgba(39, 174, 96, 0.2);
+    }
+}
+
+/* Fumaça da Rebelião - Para instabilidade e revoltas */
+@keyframes smokeRebellion {
+    0% { 
+        opacity: 0;
+        transform: translateY(0) scale(0.8);
+        filter: blur(0) brightness(1);
+    }
+    30% { 
+        opacity: calc(0.8 * var(--effects-intensity));
+        transform: translateY(calc(-20px * var(--effects-intensity))) scale(1.1);
+        filter: blur(calc(2px * var(--effects-intensity))) brightness(1.2);
+    }
+    70% { 
+        opacity: calc(0.6 * var(--effects-intensity));
+        transform: translateY(calc(-35px * var(--effects-intensity))) scale(1.15);
+        filter: blur(calc(3px * var(--effects-intensity))) brightness(1.1);
+    }
+    100% { 
+        opacity: 0;
+        transform: translateY(calc(-50px * var(--effects-intensity))) scale(1.2);
+        filter: blur(calc(4px * var(--effects-intensity))) brightness(1);
+    }
+}
+
+/* Onda em Cartas - Para interações com cartas */
+@keyframes rippleCard {
+    0% {
+        transform: scale(1);
+        box-shadow: 
+            0 0 0 0 var(--effect-water),
+            inset 0 0 0 transparent;
+    }
+    50% {
+        transform: scale(calc(1.05 + (0.03 * var(--effects-intensity))));
+        box-shadow: 
+            0 0 0 calc(10px * var(--effects-intensity)) var(--effect-water),
+            inset 0 0 calc(10px * var(--effects-intensity)) rgba(52, 152, 219, 0.1);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 
+            0 0 0 0 transparent,
+            inset 0 0 0 transparent;
+    }
+}
+
+/* Escala em Melhorias - Para upgrades e melhorias */
+@keyframes scaleUpgrade {
+    0% { 
+        transform: scale(1) rotate(0);
+    }
+    50% { 
+        transform: scale(calc(1.1 + (0.05 * var(--effects-intensity)))) rotate(calc(5deg * var(--effects-intensity)));
+    }
+    100% { 
+        transform: scale(1) rotate(0);
+    }
+}
+
+/* Dano em Combate - Para receber dano */
+@keyframes combatDamage {
+    0% { 
+        transform: scale(1);
+        filter: brightness(1) hue-rotate(0);
+    }
+    25% { 
+        transform: scale(calc(1.05 * var(--effects-intensity)));
+        filter: brightness(1.3) hue-rotate(90deg);
+    }
+    50% { 
+        transform: scale(calc(0.95 * var(--effects-intensity)));
+        filter: brightness(1.5) hue-rotate(180deg) saturate(2);
+    }
+    75% { 
+        transform: scale(calc(1.02 * var(--effects-intensity)));
+        filter: brightness(1.2) hue-rotate(270deg);
+    }
+    100% { 
+        transform: scale(1);
+        filter: brightness(1) hue-rotate(360deg);
+    }
+}
+
+/* Curação - Para efeitos de cura e recuperação */
+@keyframes healingEffect {
+    0% { 
+        background: rgba(39, 174, 96, 0);
+        box-shadow: 0 0 0 0 var(--effect-victory);
+    }
+    50% { 
+        background: rgba(39, 174, 96, calc(0.3 * var(--effects-intensity)));
+        box-shadow: 
+            0 0 calc(20px * var(--effects-intensity)) var(--effect-victory),
+            inset 0 0 calc(30px * var(--effects-intensity)) rgba(39, 174, 96, 0.2);
+    }
+    100% { 
+        background: rgba(39, 174, 96, 0);
+        box-shadow: 0 0 0 0 transparent;
+    }
+}
+
+/* Seleção Real - Para selecionar personagens reais */
+@keyframes royalSelect {
+    0% { 
+        transform: scale(1);
+        border-color: var(--effect-gold);
+        box-shadow: 0 0 0 0 var(--effect-gold);
+    }
+    50% { 
+        transform: scale(calc(1.08 * var(--effects-intensity)));
+        border-color: var(--effect-gold);
+        box-shadow: 
+            0 0 calc(15px * var(--effects-intensity)) var(--effect-gold),
+            0 0 calc(30px * var(--effects-intensity)) var(--effect-gold-glow);
+    }
+    100% { 
+        transform: scale(calc(1.05 * var(--effects-intensity)));
+        border-color: var(--effect-gold);
+        box-shadow: 0 0 calc(10px * var(--effects-intensity)) var(--effect-gold);
+    }
+}
+
+/* Aura de Poder - Para habilidades especiais contínuas */
+@keyframes powerAura {
+    0%, 100% { 
+        box-shadow: 
+            0 0 calc(5px * var(--effects-intensity)) var(--effect-magic),
+            inset 0 0 calc(10px * var(--effects-intensity)) transparent;
+        transform: scale(1);
+    }
+    25% { 
+        box-shadow: 
+            0 0 calc(15px * var(--effects-intensity)) var(--effect-magic),
+            inset 0 0 calc(20px * var(--effects-intensity)) rgba(155, 85, 181, 0.1);
+        transform: scale(calc(1.02 * var(--effects-intensity)));
+    }
+    50% { 
+        box-shadow: 
+            0 0 calc(25px * var(--effects-intensity)) var(--effect-magic),
+            0 0 calc(35px * var(--effects-intensity)) var(--effect-magic-glow),
+            inset 0 0 calc(25px * var(--effects-intensity)) rgba(155, 85, 181, 0.2);
+        transform: scale(calc(1.05 * var(--effects-intensity)));
+    }
+    75% { 
+        box-shadow: 
+            0 0 calc(15px * var(--effects-intensity)) var(--effect-magic),
+            inset 0 0 calc(20px * var(--effects-intensity)) rgba(155, 85, 181, 0.1);
+        transform: scale(calc(1.02 * var(--effects-intensity)));
+    }
+}
+
+/* Portal Mágico - Para teletransporte e magias complexas */
+@keyframes magicPortal {
+    0% { 
+        transform: scale(0.8) rotate(0deg);
+        opacity: 0;
+        border-radius: 50%;
+        background: conic-gradient(
+            from 0deg,
+            var(--effect-magic),
+            var(--effect-water),
+            var(--effect-gold),
+            var(--effect-magic)
+        );
+    }
+    50% { 
+        transform: scale(calc(1.2 * var(--effects-intensity))) rotate(180deg);
+        opacity: calc(0.8 * var(--effects-intensity));
+        border-radius: 35%;
+        background: conic-gradient(
+            from 180deg,
+            var(--effect-magic),
+            var(--effect-water),
+            var(--effect-gold),
+            var(--effect-magic)
+        );
+    }
+    100% { 
+        transform: scale(1) rotate(360deg);
+        opacity: 0;
+        border-radius: 50%;
+        background: conic-gradient(
+            from 360deg,
+            var(--effect-magic),
+            var(--effect-water),
+            var(--effect-gold),
+            var(--effect-magic)
+        );
+    }
+}
+
+/* ===== SISTEMA DE PARTÍCULAS ===== */
+
+.particle {
+    position: absolute;
+    pointer-events: none;
+    z-index: 1000;
+    border-radius: 50%;
+}
+
+/* Partículas Douradas - Para ouro, tesouro, riqueza */
+.particle-gold {
+    background: radial-gradient(
+        circle at 30% 30%,
+        var(--effect-gold) 0%,
+        rgba(241, 196, 15, 0.8) 30%,
+        rgba(241, 196, 15, 0.4) 70%,
+        transparent 100%
+    );
+    box-shadow: 
+        0 0 calc(8px * var(--particle-intensity)) var(--effect-gold),
+        inset 0 0 calc(4px * var(--particle-intensity)) rgba(255, 255, 255, 0.3);
+}
+
+/* Partículas Mágicas - Para feitiços, magia */
+.particle-magic {
+    background: radial-gradient(
+        circle at 30% 30%,
+        var(--effect-magic) 0%,
+        rgba(155, 85, 181, 0.8) 30%,
+        rgba(155, 85, 181, 0.4) 70%,
+        transparent 100%
+    );
+    box-shadow: 
+        0 0 calc(8px * var(--particle-intensity)) var(--effect-magic),
+        inset 0 0 calc(4px * var(--particle-intensity)) rgba(255, 255, 255, 0.3);
+}
+
+/* Partículas de Fogo - Para batalha, fogo, destruição */
+.particle-fire {
+    background: radial-gradient(
+        circle at 30% 30%,
+        var(--effect-fire) 0%,
+        rgba(255, 106, 0, 0.8) 30%,
+        rgba(255, 106, 0, 0.4) 70%,
+        transparent 100%
+    );
+    box-shadow: 
+        0 0 calc(8px * var(--particle-intensity)) var(--effect-fire),
+        inset 0 0 calc(4px * var(--particle-intensity)) rgba(255, 255, 255, 0.3);
+}
+
+/* Partículas de Água - Para cartas, estratégia, fluidez */
+.particle-water {
+    background: radial-gradient(
+        circle at 30% 30%,
+        var(--effect-water) 0%,
+        rgba(52, 152, 219, 0.8) 30%,
+        rgba(52, 152, 219, 0.4) 70%,
+        transparent 100%
+    );
+    box-shadow: 
+        0 0 calc(8px * var(--particle-intensity)) var(--effect-water),
+        inset 0 0 calc(4px * var(--particle-intensity)) rgba(255, 255, 255, 0.3);
+}
+
+/* Partículas de Natureza - Para cura, vida, recursos */
+.particle-nature {
+    background: radial-gradient(
+        circle at 30% 30%,
+        var(--effect-victory) 0%,
+        rgba(39, 174, 96, 0.8) 30%,
+        rgba(39, 174, 96, 0.4) 70%,
+        transparent 100%
+    );
+    box-shadow: 
+        0 0 calc(8px * var(--particle-intensity)) var(--effect-victory),
+        inset 0 0 calc(4px * var(--particle-intensity)) rgba(255, 255, 255, 0.3);
+}
+
+/* Partículas de Sangue - Para dano, derrota */
+.particle-blood {
+    background: radial-gradient(
+        circle at 30% 30%,
+        var(--effect-defeat) 0%,
+        rgba(192, 57, 43, 0.8) 30%,
+        rgba(192, 57, 43, 0.4) 70%,
+        transparent 100%
+    );
+    box-shadow: 
+        0 0 calc(8px * var(--particle-intensity)) var(--effect-defeat),
+        inset 0 0 calc(4px * var(--particle-intensity)) rgba(255, 255, 255, 0.3);
+}
+
+/* ===== EFEITOS DE TEXTO MEDIEVAIS ===== */
+
+/* Texto Brilhante para Títulos Importantes */
+.text-glow-gold {
+    text-shadow: 
+        0 0 calc(5px * var(--effects-intensity)) var(--effect-gold),
+        0 0 calc(10px * var(--effects-intensity)) var(--effect-gold-glow),
+        0 0 calc(20px * var(--effects-intensity)) rgba(241, 196, 15, 0.3);
+    animation: textPulse 3s ease-in-out infinite;
+}
+
+@keyframes textPulse {
+    0%, 100% { 
+        text-shadow: 
+            0 0 calc(5px * var(--effects-intensity)) var(--effect-gold),
+            0 0 calc(10px * var(--effects-intensity)) var(--effect-gold-glow);
+    }
+    50% { 
+        text-shadow: 
+            0 0 calc(10px * var(--effects-intensity)) var(--effect-gold),
+            0 0 calc(20px * var(--effects-intensity)) var(--effect-gold-glow),
+            0 0 calc(30px * var(--effects-intensity)) rgba(241, 196, 15, 0.4);
+    }
+}
+
+/* Texto Flamejante para Guerra */
+.text-flame {
+    background: linear-gradient(
+        45deg,
+        #ff6a00,
+        #ff0000,
+        #ff6a00,
+        #ffff00,
+        #ff6a00
+    );
+    background-size: 400% 400%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    animation: textFlame 2s ease-in-out infinite;
+}
+
+@keyframes textFlame {
+    0%, 100% { 
+        background-position: 0% 50%;
+        filter: brightness(1);
+    }
+    50% { 
+        background-position: 100% 50%;
+        filter: brightness(1.3);
+    }
+}
+
+/* Texto Mágico para Feitiços */
+.text-magic {
+    background: linear-gradient(
+        45deg,
+        #9b55b5,
+        #3498db,
+        #9b55b5,
+        #f1c40f,
+        #9b55b5
+    );
+    background-size: 400% 400%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    animation: textMagic 3s ease-in-out infinite;
+}
+
+@keyframes textMagic {
+    0%, 100% { 
+        background-position: 0% 50%;
+        text-shadow: 0 0 5px var(--effect-magic);
+    }
+    50% { 
+        background-position: 100% 50%;
+        text-shadow: 0 0 15px var(--effect-magic);
+    }
+}
+
+/* ===== EFEITOS DE BACKGROUND ===== */
+
+/* Background de Vitória */
+.background-victory {
+    background: 
+        radial-gradient(
+            circle at 20% 80%,
+            rgba(39, 174, 96, 0.3) 0%,
+            transparent 50%
+        ),
+        radial-gradient(
+            circle at 80% 20%,
+            rgba(241, 196, 15, 0.2) 0%,
+            transparent 50%
+        ),
+        radial-gradient(
+            circle at 40% 40%,
+            rgba(52, 152, 219, 0.15) 0%,
+            transparent 50%
+        );
+    animation: backgroundShift 8s ease-in-out infinite;
+}
+
+@keyframes backgroundShift {
+    0%, 100% { 
+        background-position: 0% 0%, 100% 100%, 50% 50%;
+    }
+    50% { 
+        background-position: 100% 100%, 0% 0%, 80% 80%;
+    }
+}
+
+/* Background de Batalha */
+.background-battle {
+    background: 
+        radial-gradient(
+            circle at 10% 10%,
+            rgba(192, 57, 43, 0.4) 0%,
+            transparent 40%
+        ),
+        radial-gradient(
+            circle at 90% 90%,
+            rgba(255, 106, 0, 0.3) 0%,
+            transparent 40%
+        ),
+        radial-gradient(
+            circle at 50% 50%,
+            rgba(140, 106, 70, 0.2) 0%,
+            transparent 60%
+        );
+    animation: backgroundBattle 6s ease-in-out infinite;
+}
+
+@keyframes backgroundBattle {
+    0%, 100% { 
+        background-position: 0% 0%, 100% 100%, 50% 50%;
+        filter: hue-rotate(0deg);
+    }
+    50% { 
+        background-position: 100% 0%, 0% 100%, 30% 70%;
+        filter: hue-rotate(180deg);
+    }
+}
+
+/* ===== UTILITÁRIOS DE EFEITO ===== */
+
+/* Classe para desabilitar efeitos quando necessário */
+.no-effects * {
+    animation: none !important;
+    transition: none !important;
+    filter: none !important;
+    transform: none !important;
+}
+
+/* Classe para reduzir movimento (acessibilidade) */
+.reduce-motion * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+}
+
+/* Classe para aumentar contraste nos efeitos */
+.high-contrast-effects {
+    --effects-intensity: 1.2;
+    --particle-intensity: 1.2;
+    --glow-intensity: 1.5;
+    --shake-intensity: 1.3;
+}
+
+/* ===== RESPONSIVIDADE DOS EFEITOS ===== */
+
+@media (max-width: 768px) {
+    :root {
+        --effects-intensity: 0.6;
+        --particle-intensity: 0.6;
+        --shake-intensity: 0.7;
+    }
+    
+    /* Reduzir intensidade em dispositivos móveis */
+    .effect-shake-battle,
+    .effect-combat-damage {
+        animation-iteration-count: 1;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :root {
+        --effects-intensity: 0.1;
+        --particle-intensity: 0;
+        --shake-intensity: 0;
+    }
+    
+    .particle {
+        display: none;
+    }
+}
+
+/* ===== ESTADOS DE PERFORMANCE ===== */
+
+/* Otimização para dispositivos com pouca GPU */
+.low-performance {
+    --effects-intensity: 0.3;
+    --particle-intensity: 0.2;
+    
+    .particle {
+        display: none;
+    }
+    
+    .effect-shake-battle,
+    .effect-combat-damage,
+    .effect-magic-portal {
+        animation: none;
+    }
+}
+
+/* ===== EFEITOS ESPECIAIS POR CATEGORIA ===== */
+
+/* Efeitos para Botões de Ação */
+.action-button.effect-ready {
+    position: relative;
+    overflow: hidden;
+}
+
+.action-button.effect-ready::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        45deg,
+        transparent,
+        rgba(255, 255, 255, 0.1),
+        transparent
+    );
+    transform: rotate(45deg);
+    animation: buttonShine 3s ease-in-out infinite;
+}
+
+@keyframes buttonShine {
+    0%, 100% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+    50% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+}
+
+/* Efeitos para Barras de Progresso */
+.progress-bar.effect-pulse {
+    position: relative;
+    overflow: hidden;
+}
+
+.progress-bar.effect-pulse::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.4),
+        transparent
+    );
+    animation: progressShimmer 2s ease-in-out infinite;
+}
+
+@keyframes progressShimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+/* Efeitos para Notificações */
+.notification.effect-appear {
+    animation: notificationAppear 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes notificationAppear {
+    0% { 
+        transform: translateX(100%) scale(0.8);
+        opacity: 0;
+    }
+    70% { 
+        transform: translateX(-10%) scale(1.05);
+        opacity: 1;
+    }
+    100% { 
+        transform: translateX(0) scale(1);
+        opacity: 1;
+    }
+}
+
+/* Efeito de Desaparecer */
+.effect-fade-out {
+    animation: fadeOut 0.5s ease-out forwards;
+}
+
+@keyframes fadeOut {
+    0% { 
+        opacity: 1;
+        transform: scale(1);
+    }
+    100% { 
+        opacity: 0;
+        transform: scale(0.8);
+    }
+}
+
+/* Efeito de Aparecer */
+.effect-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    0% { 
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    100% { 
+        opacity: 1;
+        transform: scale(1);
+    }
+}
