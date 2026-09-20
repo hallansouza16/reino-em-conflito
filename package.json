@@ -1,0 +1,15 @@
+{
+  "name": "reino-em-conflito",
+  "version": "2.0.0",
+  "description": "Reino em Conflito - Remaster",
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev"
+  },
+  "author": "White Wolf",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^33.4.11"
+  }
+}

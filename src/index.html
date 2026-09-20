@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reino em Conflito</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Lora:ital,wght@0,400;0,700;1,400&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/game.css">
+</head>
+<body>
+
+    <!-- ==================== TELA: MENU ==================== -->
+    <div id="screen-menu" class="screen active">
+        <div class="menu-bg"></div>
+        <div class="menu-content">
+            <h1 class="menu-title">REINO EM<br>CONFLITO</h1>
+            <p class="menu-subtitle">Um jogo de estrategia medieval</p>
+            <div class="menu-buttons">
+                <button class="btn btn-primary btn-lg" id="btn-play">Jogar</button>
+                <button class="btn btn-secondary" id="btn-tutorial">Tutorial</button>
+                <button class="btn btn-secondary" id="btn-ranks">Patentes</button>
+            </div>
+            <div class="menu-version">v2.0 Remaster</div>
+        </div>
+    </div>
+
+    <!-- ==================== TELA: SELECAO ==================== -->
+    <div id="screen-select" class="screen">
+        <div class="select-header">
+            <h2 class="select-title">Escolha seu Lider</h2>
+            <button class="btn btn-back" id="btn-back-menu">&larr; Voltar</button>
+        </div>
+        <div class="select-grid" id="character-grid">
+            <!-- Gerado por JS -->
+        </div>
+        <div class="select-footer">
+            <div class="select-preview" id="char-preview">
+                <span class="preview-hint">Selecione um personagem</span>
+            </div>
+            <button class="btn btn-primary btn-lg" id="btn-start" disabled>Iniciar Batalha</button>
+        </div>
+    </div>
+
+    <!-- ==================== TELA: JOGO ==================== -->
+    <div id="screen-game" class="screen">
+
+        <!-- HEADER DO JOGO -->
+        <header class="game-header">
+            <div class="header-left">
+                <span class="season-badge" id="season-badge">Primavera</span>
+                <span class="turn-counter" id="turn-counter">Turno 1</span>
+            </div>
+            <div class="header-center">
+                <span class="turn-indicator" id="turn-indicator">Sua vez</span>
+            </div>
+            <div class="header-right">
+                <button class="btn-icon" id="btn-settings" title="Configuracoes">&#9881;</button>
+                <button class="btn-icon" id="btn-mute" title="Mutar">&#9834;</button>
+            </div>
+        </header>
+
+        <!-- AREA PRINCIPAL DO JOGO (3 colunas) -->
+        <main class="game-main">
+
+            <!-- COLUNA ESQUERDA: JOGADOR -->
+            <section class="player-panel panel-left" id="panel-p1">
+                <div class="panel-avatar" id="p1-avatar"></div>
+                <div class="panel-name" id="p1-name">Jogador</div>
+                <div class="panel-stats">
+                    <div class="stat-row">
+                        <span class="stat-icon" title="Moedas">&#x1FA99;</span>
+                        <div class="stat-bar"><div class="stat-fill fill-coins" id="p1-coins-fill"></div></div>
+                        <span class="stat-value" id="p1-coins">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-icon" title="Exercito">&#9876;</span>
+                        <div class="stat-bar"><div class="stat-fill fill-army" id="p1-army-fill"></div></div>
+                        <span class="stat-value" id="p1-army">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-icon" title="Comida">&#127838;</span>
+                        <div class="stat-bar"><div class="stat-fill fill-food" id="p1-food-fill"></div></div>
+                        <span class="stat-value" id="p1-food">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-icon" title="Influencia">&#9733;</span>
+                        <div class="stat-bar"><div class="stat-fill fill-influence" id="p1-influence-fill"></div></div>
+                        <span class="stat-value" id="p1-influence">0</span>
+                    </div>
+                    <div class="stat-row stat-danger">
+                        <span class="stat-icon" title="Instabilidade">&#9888;</span>
+                        <div class="stat-bar"><div class="stat-fill fill-instability" id="p1-instability-fill"></div></div>
+                        <span class="stat-value" id="p1-instability">0</span>
+                    </div>
+                </div>
+                <div class="panel-extras">
+                    <div class="extra-row">
+                        <span title="Briks">&#x1F9F1; <span id="p1-briks">0</span></span>
+                        <span title="Pontos de Acao">&#9889; AP: <span id="p1-ap">2</span></span>
+                    </div>
+                    <div class="extra-row" title="Cooldown de Mineracao">
+                        &#9874; CD: <span id="p1-cooldown">0</span>
+                    </div>
+                </div>
+                <div class="panel-ultimate">
+                    <div class="ultimate-bar"><div class="ultimate-fill" id="p1-ult-fill"></div></div>
+                    <button class="btn btn-ultimate" id="btn-ultimate" disabled>Ultimate</button>
+                </div>
+                <div class="panel-status" id="p1-status"></div>
+                <div class="panel-buildings" id="p1-buildings"></div>
+            </section>
+
+            <!-- COLUNA CENTRAL: ACOES + MERCADO + LOG -->
+            <section class="game-center">
+
+                <!-- ACOES -->
+                <div class="actions-bar">
+                    <button class="btn btn-action btn-mine" id="btn-mine" title="Minerar: +4 Moedas, +5 Comida">
+                        <span class="action-icon">&#9874;</span>
+                        <span class="action-label">Minerar</span>
+                    </button>
+                    <button class="btn btn-action btn-recruit" id="btn-recruit" title="Recrutar Exercito">
+                        <span class="action-icon">&#9876;</span>
+                        <span class="action-label">Recrutar</span>
+                    </button>
+                    <button class="btn btn-action btn-fortify" id="btn-fortify" title="Fortificar o Reino">
+                        <span class="action-icon">&#127984;</span>
+                        <span class="action-label">Fortificar</span>
+                    </button>
+                    <button class="btn btn-action btn-war" id="btn-war" title="Declarar Guerra!">
+                        <span class="action-icon">&#9876;&#65039;</span>
+                        <span class="action-label">Guerra!</span>
+                    </button>
+                    <button class="btn btn-action btn-special" id="btn-special" title="Habilidade Especial">
+                        <span class="action-icon">&#10024;</span>
+                        <span class="action-label">Especial</span>
+                    </button>
+                    <button class="btn btn-action btn-endturn" id="btn-endturn">
+                        <span class="action-icon">&#10145;</span>
+                        <span class="action-label">Passar</span>
+                    </button>
+                </div>
+
+                <!-- MERCADO DE CARTAS (inline, sem modal) -->
+                <div class="market-panel">
+                    <div class="market-header">
+                        <span class="market-title">Mercado</span>
+                        <span class="market-hint">Clique para comprar (1 AP)</span>
+                    </div>
+                    <div class="market-cards" id="market-cards">
+                        <!-- Gerado por JS -->
+                    </div>
+                </div>
+
+                <!-- LOG DE JOGO (compacto, embaixo) -->
+                <div class="game-log">
+                    <div class="log-messages" id="log-messages">
+                        <p class="log-welcome">Escolha suas acoes sabiamente...</p>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- COLUNA DIREITA: OPONENTE (IA) -->
+            <section class="player-panel panel-right" id="panel-p2">
+                <div class="panel-avatar" id="p2-avatar"></div>
+                <div class="panel-name" id="p2-name">Oponente</div>
+                <div class="panel-stats">
+                    <div class="stat-row">
+                        <span class="stat-icon">&#x1FA99;</span>
+                        <div class="stat-bar"><div class="stat-fill fill-coins" id="p2-coins-fill"></div></div>
+                        <span class="stat-value" id="p2-coins">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-icon">&#9876;</span>
+                        <div class="stat-bar"><div class="stat-fill fill-army" id="p2-army-fill"></div></div>
+                        <span class="stat-value" id="p2-army">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-icon">&#127838;</span>
+                        <div class="stat-bar"><div class="stat-fill fill-food" id="p2-food-fill"></div></div>
+                        <span class="stat-value" id="p2-food">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-icon">&#9733;</span>
+                        <div class="stat-bar"><div class="stat-fill fill-influence" id="p2-influence-fill"></div></div>
+                        <span class="stat-value" id="p2-influence">0</span>
+                    </div>
+                    <div class="stat-row stat-danger">
+                        <span class="stat-icon">&#9888;</span>
+                        <div class="stat-bar"><div class="stat-fill fill-instability" id="p2-instability-fill"></div></div>
+                        <span class="stat-value" id="p2-instability">0</span>
+                    </div>
+                </div>
+                <div class="panel-extras">
+                    <div class="extra-row">
+                        <span>&#x1F9F1; <span id="p2-briks">0</span></span>
+                        <span>&#9889; AP: <span id="p2-ap">2</span></span>
+                    </div>
+                </div>
+                <div class="panel-ultimate">
+                    <div class="ultimate-bar"><div class="ultimate-fill" id="p2-ult-fill"></div></div>
+                </div>
+                <div class="panel-status" id="p2-status"></div>
+            </section>
+
+        </main>
+
+        <!-- PAINEL DE EVENTO (inline, substitui acoes temporariamente) -->
+        <div class="event-overlay" id="event-overlay" style="display:none;">
+            <div class="event-panel">
+                <h3 class="event-title" id="event-title"></h3>
+                <p class="event-desc" id="event-desc"></p>
+                <div class="event-choices">
+                    <button class="btn btn-choice btn-choice-a" id="btn-choice-a"></button>
+                    <button class="btn btn-choice btn-choice-b" id="btn-choice-b"></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- RESULTADO DO JOGO (overlay, aparece no fim) -->
+        <div class="gameover-overlay" id="gameover-overlay" style="display:none;">
+            <div class="gameover-panel">
+                <h2 class="gameover-title" id="gameover-title"></h2>
+                <p class="gameover-reason" id="gameover-reason"></p>
+                <div class="gameover-stats" id="gameover-stats"></div>
+                <button class="btn btn-primary btn-lg" id="btn-play-again">Jogar Novamente</button>
+                <button class="btn btn-secondary" id="btn-back-to-menu">Menu Principal</button>
+            </div>
+        </div>
+
+        <!-- SETTINGS PANEL (slide-in lateral, sem modal) -->
+        <div class="settings-panel" id="settings-panel">
+            <h3>Configuracoes</h3>
+            <div class="setting-row">
+                <label>Volume Geral</label>
+                <input type="range" id="vol-master" min="0" max="100" value="50">
+            </div>
+            <div class="setting-row">
+                <label>Musica</label>
+                <input type="range" id="vol-music" min="0" max="100" value="30">
+            </div>
+            <div class="setting-row">
+                <label>Efeitos</label>
+                <input type="range" id="vol-sfx" min="0" max="100" value="50">
+            </div>
+            <div class="setting-row">
+                <label>Particulas</label>
+                <input type="range" id="particles-intensity" min="0" max="100" value="50">
+            </div>
+            <button class="btn btn-secondary" id="btn-close-settings">Fechar</button>
+        </div>
+
+    </div>
+
+    <!-- ==================== TELA: TUTORIAL ==================== -->
+    <div id="screen-tutorial" class="screen">
+        <div class="info-page">
+            <button class="btn btn-back" id="btn-back-tutorial">&larr; Voltar</button>
+            <h2>Como Jogar</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>&#9874; Mineracao</h3>
+                    <p>Ganha +4 Moedas e +5 Comida. Cooldown de 3 turnos.</p>
+                </div>
+                <div class="info-card">
+                    <h3>&#9876; Recrutamento</h3>
+                    <p>Gasta moedas e comida para recrutar exercito.</p>
+                </div>
+                <div class="info-card">
+                    <h3>&#127984; Fortificacao</h3>
+                    <p>Reduz instabilidade gastando moedas e influencia.</p>
+                </div>
+                <div class="info-card">
+                    <h3>&#9876;&#65039; Guerra</h3>
+                    <p>Ataque o oponente! Precisa de 10+ de exercito.</p>
+                </div>
+                <div class="info-card">
+                    <h3>&#x1FA99; Mercado</h3>
+                    <p>Compre cartas para ganhar vantagens. 5 cartas por turno.</p>
+                </div>
+                <div class="info-card">
+                    <h3>&#9888; Instabilidade</h3>
+                    <p>Se chegar a 10, seu reino colapsa. Voce perde!</p>
+                </div>
+                <div class="info-card">
+                    <h3>&#127807; Estacoes</h3>
+                    <p>A cada 5 turnos o clima muda. Inverno consome comida extra!</p>
+                </div>
+                <div class="info-card">
+                    <h3>&#128293; Ultimate</h3>
+                    <p>Barra carrega com acoes. Quando cheia, poder devastador!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== TELA: RANKS ==================== -->
+    <div id="screen-ranks" class="screen">
+        <div class="info-page">
+            <button class="btn btn-back" id="btn-back-ranks">&larr; Voltar</button>
+            <h2>Patentes</h2>
+            <div class="ranks-display" id="ranks-display">
+                <!-- Gerado por JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
