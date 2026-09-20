@@ -2,23 +2,23 @@ export const CHARACTERS = [
     {
         id: 'rei', 
         name: 'Rei', 
-        image: 'http://localhost:4000/images/characters/rei.png',
+        image: '/images/characters/rei.png',
         initial: { coins: 10, army: 10, instability: 0, food: 15, influence: 10, briks: 0 }, 
         passive: 'Monarca: +1 Moeda extra no início de cada turno.',
-        effect: (p) => { if (p.playerNumber === 1) p.coins += 1; return '+1 Moeda (Monarca)'; }
+        effect: (p) => { p.coins += 1; return '+1 Moeda (Monarca)'; }
     },
     {
         id: 'rainha', 
         name: 'Rainha', 
-        image: 'http://localhost:4000/images/characters/rainha.png',
+        image: '/images/characters/rainha.png',
         initial: { coins: 12, army: 8, instability: 0, food: 15, influence: 10, briks: 0 }, 
         passive: 'Consorte: -1 Instabilidade no início do turno (máx. 0).',
-        effect: (p) => { if (p.playerNumber === 1) p.instability = Math.max(0, p.instability - 1); return '-1 Instabilidade (Consorte)'; }
+        effect: (p) => { p.instability = Math.max(0, p.instability - 1); return '-1 Instabilidade (Consorte)'; }
     },
     {
         id: 'ferreiro', 
         name: 'Ferreiro', 
-        image: 'http://localhost:4000/images/characters/ferreiro.png',
+        image: '/images/characters/ferreiro.png',
         initial: { coins: 8, army: 12, instability: 1, food: 15, influence: 10, briks: 0 }, 
         passive: 'Mestre de Armas: Custo de Recrutamento (padrão) reduzido em 1.',
         setup: () => { return { RECRUIT_COST_BASE: 2 }; }
@@ -26,22 +26,19 @@ export const CHARACTERS = [
     {
         id: 'ladrao', 
         name: 'Ladrão', 
-        image: 'http://localhost:4000/images/characters/ladrão.png',
+        image: '/images/characters/ladrão.png',
         initial: { coins: 15, army: 5, instability: 2, food: 15, influence: 10, briks: 0 }, 
         passive: 'Latrocínio: Ação "Minerar" dá +1 Moeda extra, mas +1 Instabilidade.',
         mineEffect: (p) => {
-            if (p.playerNumber === 1) {
-                p.coins += 1;
-                p.instability += 1;
-                return '+1 Moeda EXTRA (Latrocínio) e +1 Instabilidade';
-            }
-            return null;
+            p.coins += 1;
+            p.instability += 1;
+            return '+1 Moeda EXTRA (Latrocínio) e +1 Instabilidade';
         }
     },
     {
         id: 'amante', 
         name: 'Amante', 
-        image: 'http://localhost:4000/images/characters/amante.png',
+        image: '/images/characters/amante.png',
         initial: { coins: 9, army: 9, instability: 1, food: 15, influence: 10, briks: 0 }, 
         passive: 'Intriga: Custos de cartas de Oponente/Interferência/Risco (Gamble) reduzidos em 1.',
         costModifier: (card) => {
@@ -52,7 +49,7 @@ export const CHARACTERS = [
     {
         id: 'soldado', 
         name: 'Soldado', 
-        image: 'http://localhost:4000/images/characters/Soldado.png',
+        image: '/images/characters/Soldado.png',
         initial: { coins: 5, army: 15, instability: 0, food: 15, influence: 10, briks: 0 }, 
         passive: 'Guarda Real: Limite de Exército para Rebelião aumenta para 6 (era 4).',
         setup: () => { return { REBELLION_ARMY_LIMIT: 6 }; }
@@ -60,15 +57,12 @@ export const CHARACTERS = [
     {
         id: 'programador', 
         name: 'Mestre Programador', 
-        image: 'http://localhost:4000/images/characters/Mestre Programador.png',
+        image: '/images/characters/Mestre Programador.png',
         initial: { coins: 7, army: 8, instability: 0, food: 12, influence: 15, briks: 0 }, 
         passive: 'Código Eficiente: Cartas custam -2 Moedas (mínimo 1) e +1 Ação extra por turno.',
-        effect: (p) => { 
-            if (p.playerNumber === 1) {
-                p.ap = Math.min(3, p.ap + 1);
-                return '+1 Ação Extra (Código Eficiente)';
-            }
-            return null;
+        effect: (p) => {
+            p.ap = Math.min(3, p.ap + 1);
+            return '+1 Ação Extra (Código Eficiente)';
         },
         costModifier: (card) => -2,
         setup: () => { return { ACTION_POINTS_MAX: 3 }; }
@@ -76,15 +70,12 @@ export const CHARACTERS = [
     {
         id: 'princesa', 
         name: 'Princesa Real', 
-        image: 'http://localhost:4000/images/characters/Princesa Real.png',
+        image: '/images/characters/Princesa Real.png',
         initial: { coins: 13, army: 6, instability: 0, food: 18, influence: 14, briks: 0 }, 
         passive: 'Herdeira Real: +2 Influência no início do turno e custo de Fortificação reduzido pela metade.',
-        effect: (p) => { 
-            if (p.playerNumber === 1) {
-                p.influence += 2;
-                return '+2 Influência (Herdeira Real)';
-            }
-            return null;
+        effect: (p) => {
+            p.influence += 2;
+            return '+2 Influência (Herdeira Real)';
         },
         costModifier: (card) => {
             if (card.type === 'Self' || card.type === 'Status') return -1;
@@ -95,11 +86,11 @@ export const CHARACTERS = [
     {
         id: 'bruxa', 
         name: 'Bruxa Sábia', 
-        image: 'http://localhost:4000/images/characters/bruxa.png',
+        image: '/images/characters/bruxa.png',
         initial: { coins: 6, army: 7, instability: 1, food: 13, influence: 16, briks: 0 }, 
         passive: 'Magia Ancestral: Pode comprar 2 cartas por ação e tem 25% de chance de duplicar efeitos de cartas.',
-        effect: (p) => { 
-            if (p.playerNumber === 1 && Math.random() < 0.3) {
+        effect: (p) => {
+            if (Math.random() < 0.3) {
                 const bonus = Math.floor(Math.random() * 3) + 1;
                 const resource = ['coins', 'influence', 'food'][Math.floor(Math.random() * 3)];
                 p[resource] += bonus;
@@ -109,7 +100,7 @@ export const CHARACTERS = [
         },
         cardEffectMultiplier: () => Math.random() < 0.25 ? 2 : 1,
         specialAbility: (p, op) => {
-            if (p.playerNumber === 1 && p.ap >= 1) {
+            if (p.ap >= 1) {
                 p.ap -= 1;
                 const effect = Math.random();
                 if (effect < 0.33) {

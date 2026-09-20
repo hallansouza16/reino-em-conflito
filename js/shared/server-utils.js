@@ -3,7 +3,7 @@
 // Importações necessárias
 import { CHARACTERS } from './characters.js';
 import { CARDS } from './cards.js';
-import { GAME_CONSTANTS } from './constants.js';
+import { GAME_CONSTANTS, BUILDINGS } from './constants.js';
 
 // Função para aplicar efeito de carta (compatível com servidor)
 export function applyCardEffect(card, player, opponent) {
@@ -25,8 +25,8 @@ export function applyCardEffect(card, player, opponent) {
                         player.coins += 10;
                         result.push("SUCESSO! +10 Moedas");
                     } else {
-                        opponent.instability = Math.max(0, opponent.instability - 2);
-                        result.push("FALHA! Oponente perde -2 Instabilidade");
+                        player.instability += 2;
+                        result.push("FALHA! +2 Instabilidade para você");
                     }
                 } else {
                     const parts = trimmed.split('_');
@@ -145,19 +145,19 @@ export function processPlayerUpkeep(player, character) {
 
 // Função para verificar condições de fim de jogo
 export function checkGameEndCondition(player, opponent) {
-    if (player.instability >= GAME_CONSTANTS.INSTABILITY_LIMIT) {
-        return {
-            gameOver: true,
-            winner: opponent,
-            reason: `A Instabilidade de ${player.name} atingiu o limite de ${GAME_CONSTANTS.INSTABILITY_LIMIT}.`
-        };
-    }
-
     if (opponent.army >= GAME_CONSTANTS.REBELLION_ARMY_LIMIT && player.instability >= GAME_CONSTANTS.INSTABILITY_LIMIT) {
         return {
             gameOver: true,
             winner: opponent,
-            reason: `${opponent.name} tinha um Exército de ${opponent.army} e ${player.name} atingiu ${GAME_CONSTANTS.INSTABILITY_LIMIT} de Instabilidade.`
+            reason: `${opponent.name} tinha um Exército de ${opponent.army} e ${player.name} atingiu ${GAME_CONSTANTS.INSTABILITY_LIMIT} de Instabilidade. Rebelião militar!`
+        };
+    }
+
+    if (player.instability >= GAME_CONSTANTS.INSTABILITY_LIMIT) {
+        return {
+            gameOver: true,
+            winner: opponent,
+            reason: `A Instabilidade de ${player.name} atingiu o limite de ${GAME_CONSTANTS.INSTABILITY_LIMIT}. O povo se revoltou!`
         };
     }
 
@@ -180,4 +180,4 @@ function shuffleArray(array) {
     return array;
 }
 
-export { CHARACTERS, CARDS, GAME_CONSTANTS };
+export { CHARACTERS, CARDS, GAME_CONSTANTS, BUILDINGS };

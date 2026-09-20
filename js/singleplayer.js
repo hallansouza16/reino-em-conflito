@@ -72,7 +72,7 @@ function getRandomAICharacter() {
     const aiCharacters = [
         { 
             name: 'Rei da IA', 
-            image: 'http://localhost:4000/images/characters/rei.png',
+            image: '/images/characters/rei.png',
             initial: { coins: 12, army: 12, instability: 0, food: 18, influence: 12, briks: 0 },
             behavior: 'balanced', // Comportamento equilibrado
             difficulty: 'medium',
@@ -80,7 +80,7 @@ function getRandomAICharacter() {
         },
         { 
             name: 'Rainha da IA', 
-            image: 'http://localhost:4000/images/characters/rainha.png',
+            image: '/images/characters/rainha.png',
             initial: { coins: 15, army: 8, instability: 0, food: 15, influence: 15, briks: 0 },
             behavior: 'economic', // Foca em economia
             difficulty: 'hard',
@@ -88,7 +88,7 @@ function getRandomAICharacter() {
         },
         { 
             name: 'Ferreiro da IA', 
-            image: 'http://localhost:4000/images/characters/ferreiro.png',
+            image: '/images/characters/ferreiro.png',
             initial: { coins: 8, army: 18, instability: 1, food: 20, influence: 8, briks: 0 },
             behavior: 'military', // Foca em exército
             difficulty: 'medium',
@@ -96,7 +96,7 @@ function getRandomAICharacter() {
         },
         { 
             name: 'Ladrão da IA', 
-            image: 'http://localhost:4000/images/characters/ladrão.png',
+            image: '/images/characters/ladrão.png',
             initial: { coins: 20, army: 6, instability: 2, food: 12, influence: 8, briks: 0 },
             behavior: 'aggressive', // Joga agressivamente
             difficulty: 'hard',
@@ -104,7 +104,7 @@ function getRandomAICharacter() {
         },
         { 
             name: 'Amante da IA', 
-            image: 'http://localhost:4000/images/characters/amante.png',
+            image: '/images/characters/amante.png',
             initial: { coins: 10, army: 10, instability: 0, food: 16, influence: 18, briks: 0 },
             behavior: 'diplomatic', // Foca em influência
             difficulty: 'medium',
@@ -112,7 +112,7 @@ function getRandomAICharacter() {
         },
         { 
             name: 'Soldado da IA', 
-            image: 'http://localhost:4000/images/characters/Soldado.png',
+            image: '/images/characters/Soldado.png',
             initial: { coins: 6, army: 22, instability: 0, food: 25, influence: 6, briks: 0 },
             behavior: 'military', // Extremamente militar
             difficulty: 'very_hard',
@@ -120,7 +120,7 @@ function getRandomAICharacter() {
         },
         { 
             name: 'Mestre Programador IA', 
-            image: 'http://localhost:4000/images/characters/Mestre Programador.png',
+            image: '/images/characters/Mestre Programador.png',
             initial: { coins: 9, army: 9, instability: 0, food: 14, influence: 16, briks: 1 },
             behavior: 'strategic', // Joga com cartas e estratégia
             difficulty: 'hard',
@@ -128,7 +128,7 @@ function getRandomAICharacter() {
         },
         { 
             name: 'Princesa IA', 
-            image: 'http://localhost:4000/images/characters/Princesa Real.png',
+            image: '/images/characters/Princesa Real.png',
             initial: { coins: 14, army: 7, instability: 0, food: 20, influence: 14, briks: 0 },
             behavior: 'economic', // Foca em recursos
             difficulty: 'medium',
@@ -136,7 +136,7 @@ function getRandomAICharacter() {
         },
         { 
             name: 'Bruxa IA', 
-            image: 'http://localhost:4000/images/characters/bruxa.png',
+            image: '/images/characters/bruxa.png',
             initial: { coins: 7, army: 8, instability: 1, food: 15, influence: 20, briks: 0 },
             behavior: 'unpredictable', // Comportamento imprevisível
             difficulty: 'very_hard',
@@ -508,6 +508,7 @@ function recruitAction(p) {
 
     log(`<span class="log-positive">${p.name}</span> Recrutou Exército: -${(p.buildings && p.buildings.includes('barracks')) ? Math.max(1, cost - 1) : cost} M, -${foodCost} C, +${gainArmy} Exército.`, 'log-positive');
     playSound('recruit');
+    p.ultimateCharge = Math.min(GAME_CONSTANTS.ULTIMATE_CHARGE_MAX, (p.ultimateCharge || 0) + 1);
     return true;
 }
 
@@ -539,6 +540,7 @@ function fortifyAction(p) {
 
     log(`<span class="log-positive">${p.name}</span> Fortificou: -${cost} M, -${influenceCost} I, -${lossInstability} Inst. + ${gainInstability} Inst.`, 'log-positive');
     playSound('build');
+    p.ultimateCharge = Math.min(GAME_CONSTANTS.ULTIMATE_CHARGE_MAX, (p.ultimateCharge || 0) + 1);
     return true;
 }
 
@@ -547,7 +549,7 @@ function warAction(p, p_op) {
 
     p.ap -= 1;
     shakeElement('game-container');
-    
+
     // Gritos de Guerra e Efeitos de Guerra
     if (window.audioSystem) {
         window.audioSystem.playWar();
@@ -555,16 +557,37 @@ function warAction(p, p_op) {
     }
     if (window.visualEffects) {
         window.visualEffects.playWarEffects();
-        if (selectedCharacter && p.playerNumber === 1) {
-            log(`⚔️ O ${selectedCharacter.name} avança com fúria!`, 'log-war');
-        }
     }
 
-    combatSystem.startCombat(p, p_op, (combatResult) => {
-        processCombatResults(combatResult, p, p_op);
+    // Se é o jogador humano, abrir combate tático
+    if (p.playerNumber === 1) {
+        log(`⚔️ O ${selectedCharacter.name} avança com fúria!`, 'log-war');
+        combatSystem.startCombat(p, p_op, (combatResult) => {
+            processCombatResults(combatResult, p, p_op);
+            updateUI();
+            checkGameOver();
+        });
+    } else {
+        // IA: calcular combate automático sem modal
+        log(`⚔️ ${p.charName} declara guerra!`, 'log-war');
+        const attackPower = p.army + Math.floor(Math.random() * 6);
+        const defensePower = p_op.army + Math.floor(Math.random() * 6);
+        const playerCasualties = Math.floor(Math.random() * 3) + 1;
+        const enemyCasualties = Math.floor(Math.random() * 3) + 1;
+
+        let result;
+        if (attackPower > defensePower) {
+            result = 'victory';
+        } else if (attackPower < defensePower) {
+            result = 'defeat';
+        } else {
+            result = Math.random() < 0.5 ? 'victory' : 'defeat';
+        }
+
+        processCombatResults({ result, playerCasualties, enemyCasualties }, p, p_op);
         updateUI();
         checkGameOver();
-    });
+    }
 
     return true;
 }
@@ -660,13 +683,18 @@ function p2AIAction() {
         if (availableCards.length > 0 && Math.random() < behavior.cardPriority) {
             // Prefere cartas baseadas no comportamento
             let bestCard;
-            if (behavior.military) {
-                bestCard = availableCards.find(card => card.type === 'Self' && card.name.includes('Recrutamento'));
-            } else if (behavior.economic) {
-                bestCard = availableCards.find(card => card.type === 'Self' && card.name.includes('Comércio'));
-            } else if (behavior.aggressive) {
-                bestCard = availableCards.find(card => card.type === 'Opponent');
-            } else {
+            const aiBehavior = p2.aiBehavior || 'balanced';
+            if (aiBehavior === 'military' || aiBehavior === 'aggressive') {
+                bestCard = availableCards.find(card => card.type === 'Self' && card.name.includes('Recrutamento'))
+                        || availableCards.find(card => card.type === 'Opponent');
+            } else if (aiBehavior === 'economic' || aiBehavior === 'strategic') {
+                bestCard = availableCards.find(card => card.type === 'Self' && card.name.includes('Comércio'))
+                        || availableCards.find(card => card.type === 'Self');
+            } else if (aiBehavior === 'diplomatic') {
+                bestCard = availableCards.find(card => card.type === 'Status')
+                        || availableCards.find(card => card.type === 'Self');
+            }
+            if (!bestCard) {
                 bestCard = availableCards[Math.floor(Math.random() * availableCards.length)];
             }
             
@@ -856,18 +884,58 @@ function useUltimate(p, p_op) {
             resultMsg = "Chamado às Armas: +10 Exército e +10 Comida!";
             effectColor = 'rgba(241, 196, 15, 0.5)';
             break;
-        case 'bruxa':
-            p_op.ap = 0;
-            p_op.status.push('LOW_MORALE');
-            resultMsg = "Eclipse Místico: Inimigo perdeu todos os AP e ganhou Moral Baixa!";
-            effectColor = 'rgba(155, 89, 182, 0.6)';
+        case 'rainha':
+            p.instability = 0;
+            p.influence += 10;
+            resultMsg = "Decreto da Rainha: Instabilidade zerada e +10 Influência!";
+            effectColor = 'rgba(142, 68, 173, 0.5)';
             break;
-        case 'ladrão':
+        case 'ferreiro':
+            p.army += 8;
+            p.briks += 3;
+            resultMsg = "Forja Suprema: +8 Exército e +3 Briks!";
+            effectColor = 'rgba(230, 126, 34, 0.5)';
+            break;
+        case 'ladrao': {
             const stolen = Math.floor(p_op.coins * 0.5);
             p_op.coins -= stolen;
             p.coins += stolen;
             resultMsg = "O Grande Assalto: Roubou " + stolen + " moedas do oponente!";
             effectColor = 'rgba(44, 62, 80, 0.7)';
+            break;
+        }
+        case 'amante':
+            p_op.instability += 4;
+            p.influence += 5;
+            resultMsg = "Intriga Real: +4 Instabilidade no inimigo e +5 Influência!";
+            effectColor = 'rgba(231, 76, 60, 0.5)';
+            break;
+        case 'soldado':
+            p.army += 15;
+            p_op.army = Math.max(0, p_op.army - 5);
+            resultMsg = "Marcha Imperial: +15 Exército e inimigo perde 5!";
+            effectColor = 'rgba(52, 73, 94, 0.6)';
+            break;
+        case 'programador':
+            p.ap += 3;
+            p.coins += 8;
+            p.briks += 2;
+            resultMsg = "Hack do Sistema: +3 AP, +8 Moedas e +2 Briks!";
+            effectColor = 'rgba(46, 204, 113, 0.5)';
+            break;
+        case 'princesa':
+            p.coins += 10;
+            p.influence += 8;
+            p.instability = Math.max(0, p.instability - 3);
+            resultMsg = "Festival Real: +10 Moedas, +8 Influência, -3 Instabilidade!";
+            effectColor = 'rgba(241, 196, 15, 0.4)';
+            break;
+        case 'bruxa':
+            p_op.ap = 0;
+            if (!p_op.status) p_op.status = [];
+            if (!p_op.status.includes('LOW_MORALE')) p_op.status.push('LOW_MORALE');
+            resultMsg = "Eclipse Místico: Inimigo perdeu todos os AP e ganhou Moral Baixa!";
+            effectColor = 'rgba(155, 89, 182, 0.6)';
             break;
         default:
             p.ap += 2;
@@ -943,8 +1011,11 @@ function updateUI() {
         });
         
         const isActive = num === currentPlayer;
-        indicator.style.display = isActive ? 'block' : 'none';
-        indicator.classList.toggle('active-pulse', isActive);
+        const indicator = document.getElementById(`p${num}-turn-indicator`);
+        if (indicator) {
+            indicator.style.display = isActive ? 'block' : 'none';
+            indicator.classList.toggle('active-pulse', isActive);
+        }
 
         // Atualizar Edificações Visuais
         const buildContainer = document.getElementById(`p${num}-buildings`);
@@ -1097,15 +1168,15 @@ function checkGameOver() {
     if (isGameOver) return true;
     
     const check = (p, p_op) => {
+        if (p_op.army >= REBELLION_ARMY_LIMIT && p.instability >= INSTABILITY_LIMIT) {
+            log(`<span class="log-war">${p.name} é destruído! Rebelião militar!</span>`, 'log-event log-lose');
+            shakeElement('game-container');
+            return { winner: p_op, reason: `${p_op.name} tinha um Exército de ${p_op.army} e ${p.name} atingiu ${INSTABILITY_LIMIT} de Instabilidade.` };
+        }
         if (p.instability >= INSTABILITY_LIMIT) {
             log(`<span class="log-war">${p.name} atinge ${INSTABILITY_LIMIT} de Instabilidade! O povo se revolta!</span>`, 'log-event log-lose');
             shakeElement('game-container');
             return { winner: p_op, reason: `A Instabilidade de ${p.name} atingiu o limite de ${INSTABILITY_LIMIT}.` };
-        }
-        if (p_op.army >= REBELLION_ARMY_LIMIT && p.instability >= INSTABILITY_LIMIT) {
-            log(`<span class="log-war">${p.name} é destruído!</span>`, 'log-event log-lose');
-            shakeElement('game-container');
-            return { winner: p_op, reason: `${p_op.name} tinha um Exército de ${p_op.army} e ${p.name} atingiu ${INSTABILITY_LIMIT} de Instabilidade.` };
         }
         return null;
     };

@@ -16,7 +16,7 @@ import {
     renderCharacterSelection
 } from './shared/utils.js';
 
-const socket = io('http://localhost:4000');
+const socket = io(window.location.origin);
 
 // Usar constantes do módulo
 const {

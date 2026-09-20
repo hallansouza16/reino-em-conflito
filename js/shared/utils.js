@@ -69,14 +69,12 @@ export const calculateCost = (baseCost, player, isCard = false, cardType = null,
         cost += 1;
     }
     
-    if (player.playerNumber === 1 && hasUpgrade(player, 'tax_reform')) {
+    if (hasUpgrade(player, 'tax_reform')) {
         cost = Math.max(1, cost - 1);
     }
-    
-    if (isCard && player.playerNumber === 1 && selectedCharacter && selectedCharacter.costModifier) {
-        if (cardType === 'Opponent' || cardType === 'Gamble') {
-            cost = Math.max(1, cost + selectedCharacter.costModifier({ type: cardType }));
-        }
+
+    if (isCard && selectedCharacter && selectedCharacter.costModifier) {
+        cost = Math.max(1, cost + selectedCharacter.costModifier({ type: cardType }));
     }
     return Math.max(1, cost);
 };
