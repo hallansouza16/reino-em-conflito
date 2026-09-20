@@ -78,6 +78,21 @@
                         <div class="stat-bar"><div class="stat-icon">🔥 INST.</div><div class="bar-container"><div id="p1-instability-fill" class="bar-fill instability-fill"></div></div><span id="p1-instability-value" class="stat-value"></span></div>
                         <div class="stat-bar" id="p1-cooldown-stat"><div class="stat-icon">⛏️ CD.</div><div class="bar-container"><div id="p1-mine-cooldown-fill" class="bar-fill cooldown-fill"></div></div><span id="p1-mine-cooldown-value" class="stat-value"></span></div>
                     </div>
+
+                    <!-- Edificações -->
+                    <div class="buildings-container" id="p1-buildings">
+                        <div class="building-slot" data-building="barracks">🏰<span class="building-tooltip">Quartel</span></div>
+                        <div class="building-slot" data-building="mill">🌾<span class="building-tooltip">Moinho</span></div>
+                        <div class="building-slot" data-building="academy">🏛️<span class="building-tooltip">Academia</span></div>
+                    </div>
+
+                    <!-- Ultimate -->
+                    <div class="ultimate-section">
+                        <span class="ultimate-label">CARGA SUPREMA</span>
+                        <div class="ultimate-bar-container">
+                            <div id="p1-ultimate-fill" class="ultimate-bar-fill"></div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Centro -->
@@ -109,6 +124,21 @@
                         <div class="stat-bar"><div class="stat-icon">✨ INF.</div><div class="bar-container"><div id="p2-influence-fill" class="bar-fill influence-fill"></div></div><span id="p2-influence-value" class="stat-value"></span></div>
                         <div class="stat-bar"><div class="stat-icon">🔥 INST.</div><div class="bar-container"><div id="p2-instability-fill" class="bar-fill instability-fill"></div></div><span id="p2-instability-value" class="stat-value"></span></div>
                         <div class="stat-bar" id="p2-cooldown-stat"><div class="stat-icon">⛏️ CD.</div><div class="bar-container"><div id="p2-mine-cooldown-fill" class="bar-fill cooldown-fill"></div></div><span id="p2-mine-cooldown-value" class="stat-value"></span></div>
+                    </div>
+
+                    <!-- Edificações -->
+                    <div class="buildings-container" id="p2-buildings">
+                        <div class="building-slot" data-building="barracks">🏰<span class="building-tooltip">Quartel</span></div>
+                        <div class="building-slot" data-building="mill">🌾<span class="building-tooltip">Moinho</span></div>
+                        <div class="building-slot" data-building="academy">🏛️<span class="building-tooltip">Academia</span></div>
+                    </div>
+
+                    <!-- Ultimate -->
+                    <div class="ultimate-section">
+                        <span class="ultimate-label">CARGA SUPREMA</span>
+                        <div class="ultimate-bar-container">
+                            <div id="p2-ultimate-fill" class="ultimate-bar-fill"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -145,6 +175,16 @@
             </div>
         </div>
     </div>
+
+    <!-- Elementos Dinâmicos da Fase 2 -->
+    <div id="achievement-toast" class="achievement-toast">
+        <div class="toast-icon">🏆</div>
+        <div class="toast-content">
+            <h4 id="toast-title">Conquista!</h4>
+            <p id="toast-desc">Você alcançou um novo marco.</p>
+        </div>
+    </div>
+    <div id="screen-flash" class="screen-flash"></div>
 
     <!-- SISTEMAS DE ÁUDIO E EFEITOS -->
     <script type="module" src="js/audio-system.js"></script>

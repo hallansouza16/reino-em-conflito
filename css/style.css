@@ -1082,3 +1082,150 @@ body {
         min-width: auto;
     }
 }
+
+/* --- FASE 2: NOVOS COMPONENTES --- */
+
+/* Achievement Toast */
+.achievement-toast {
+    position: fixed;
+    top: 20px;
+    right: -350px;
+    width: 320px;
+    background: linear-gradient(135deg, var(--color-surface) 0%, #4a3520 100%);
+    border: 3px solid var(--color-gold);
+    border-radius: 12px;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+    z-index: 2000;
+    transition: right 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.achievement-toast.active {
+    right: 20px;
+}
+
+.toast-icon {
+    font-size: 2.5em;
+    filter: drop-shadow(0 0 5px var(--color-gold));
+}
+
+.toast-content h4 {
+    color: var(--color-gold);
+    margin: 0;
+    font-size: 1.1em;
+    text-transform: uppercase;
+}
+
+.toast-content p {
+    margin: 5px 0 0 0;
+    font-size: 0.9em;
+    opacity: 0.9;
+}
+
+/* Buildings Container */
+.buildings-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+    min-height: 40px;
+}
+
+.building-slot {
+    width: 40px;
+    height: 40px;
+    background: rgba(0,0,0,0.5);
+    border: 2px solid var(--color-border);
+    border-radius: 6px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5em;
+    position: relative;
+    transition: all 0.3s;
+}
+
+.building-slot.built {
+    border-color: var(--color-gold);
+    box-shadow: 0 0 10px rgba(241, 196, 15, 0.3);
+    background: var(--color-surface);
+}
+
+.building-tooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--color-bg-dark);
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.7em;
+    white-space: nowrap;
+    display: none;
+    z-index: 100;
+}
+
+.building-slot:hover .building-tooltip {
+    display: block;
+}
+
+/* Ultimate Bar */
+.ultimate-section {
+    width: 100%;
+    margin-top: 15px;
+}
+
+.ultimate-label {
+    font-size: 0.8em;
+    font-weight: 700;
+    color: var(--color-fire);
+    margin-bottom: 5px;
+    display: block;
+}
+
+.ultimate-bar-container {
+    height: 20px;
+    background: rgba(0,0,0,0.4);
+    border: 2px solid var(--color-bg-dark);
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+}
+
+.ultimate-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #e67e22 0%, #ff6a00 100%);
+    transition: width 0.5s;
+}
+
+.ultimate-ready {
+    animation: ultimateGlow 1s infinite alternate;
+}
+
+@keyframes ultimateGlow {
+    from { box-shadow: 0 0 5px var(--color-fire); }
+    to { box-shadow: 0 0 20px var(--color-fire), 0 0 30px var(--color-gold); }
+}
+
+#special-ability-button.ult-ready {
+    background-color: var(--color-fire);
+    border-color: var(--color-gold);
+    animation: pulse-turn 1s infinite alternate;
+}
+
+/* Screen Flash for Ultimates */
+.screen-flash {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.3s;
+}

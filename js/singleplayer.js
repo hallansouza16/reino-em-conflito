@@ -46,17 +46,19 @@ let isGamePaused = false;
 let turnCount = 0;
 let marketCards = [];
 let globalCoins = 10;
+let currentSeason = 'Primavera'; // Primavera, Verão, Outono, Inverno
+let turnsInSeason = 0;
 
 // Players
 const player = {
     coins: 0, army: 0, instability: 0, food: 15, influence: 10, briks: 0, ap: ACTION_POINTS_MAX, 
     mineCooldown: 0, name: 'Jogador 1', charName: '', passives: {}, playerNumber: 1, status: [], 
-    winCount: 0, totalCoinsEarned: 0, upgrades: []
+    winCount: 0, totalCoinsEarned: 0, upgrades: [], buildings: [], ultimateCharge: 0
 };
 
 const opponent = {
     coins: 10, army: 10, instability: 0, food: 15, influence: 10, briks: 0, ap: ACTION_POINTS_MAX, 
-    mineCooldown: 0, name: 'Oponente (IA)', playerNumber: 2, status: []
+    mineCooldown: 0, name: 'Oponente (IA)', playerNumber: 2, status: [], buildings: [], ultimateCharge: 0
 };
 
 const p1 = player;
@@ -155,39 +157,39 @@ function getAIBehavior(aiCharacter) {
             cardPriority: 0.4
         },
         economic: {
-            minePriority: 0.9,
-            recruitPriority: 0.4,
-            fortifyPriority: 0.3,
-            warPriority: 0.5,
-            cardPriority: 0.7
+            minePriority: 1.0, // Foco total em recurso
+            recruitPriority: 0.3,
+            fortifyPriority: 0.2,
+            warPriority: 0.4,
+            cardPriority: 0.8
         },
         military: {
             minePriority: 0.4,
-            recruitPriority: 0.9,
-            fortifyPriority: 0.6,
-            warPriority: 0.95,
-            cardPriority: 0.3
+            recruitPriority: 1.0, // Foco total em exército
+            fortifyPriority: 0.7,
+            warPriority: 1.0,
+            cardPriority: 0.2
         },
         aggressive: {
-            minePriority: 0.3,
-            recruitPriority: 0.8,
-            fortifyPriority: 0.2,
-            warPriority: 0.9,
-            cardPriority: 0.6
+            minePriority: 0.2,
+            recruitPriority: 0.9,
+            fortifyPriority: 0.1,
+            warPriority: 1.0,
+            cardPriority: 0.5
         },
         diplomatic: {
             minePriority: 0.5,
-            recruitPriority: 0.5,
-            fortifyPriority: 0.8,
-            warPriority: 0.4,
-            cardPriority: 0.7
+            recruitPriority: 0.4,
+            fortifyPriority: 1.0, // Foco total em estabilidade
+            warPriority: 0.3,
+            cardPriority: 0.9
         },
         strategic: {
             minePriority: 0.6,
             recruitPriority: 0.6,
             fortifyPriority: 0.6,
             warPriority: 0.7,
-            cardPriority: 0.9
+            cardPriority: 1.0 // Foco total em cartas
         },
         unpredictable: {
             minePriority: Math.random(),
@@ -253,6 +255,45 @@ const CHOICE_EVENTS = [
                 return `-2 Comida, +1 Influência. (Manutenção da paz custa recursos)`;
             } 
         }
+    },
+    { 
+        name: "Inspiração da Princesa Real", 
+        prompt: "A Princesa Real organizou um festival para elevar o espírito do povo. Como você deseja apoiar?",
+        choiceA: { 
+            label: "Patrocinar o Festival", 
+            effect: (p) => { 
+                p.coins = Math.max(0, p.coins - 5); 
+                p.influence += 6;
+                p.instability = Math.max(0, p.instability - 2);
+                return `-5 Moedas, +6 Influência, -2 Instabilidade. (O reino brilha!)`;
+            } 
+        },
+        choiceB: { 
+            label: "Apenas Comparecer", 
+            effect: (p) => { 
+                p.influence += 2;
+                return `+2 Influência. (Presença real notada)`;
+            } 
+        }
+    },
+    { 
+        name: "Greve no Ferreiro", 
+        prompt: "Os ferreiros estão exaustos e pedem melhores condições. Se não atendidos, o recrutamento será prejudicado.",
+        choiceA: { 
+            label: "Melhorar Oficinas", 
+            effect: (p) => { 
+                p.coins = Math.max(0, p.coins - 4); 
+                addStatus(p, 'ECONOMIC_BOOM', STATUS_DEFINITIONS);
+                return `-4 Moedas. Status: Boom Econômico. (Produção otimizada)`;
+            } 
+        },
+        choiceB: { 
+            label: "Ignorar Pedidos", 
+            effect: (p) => { 
+                addStatus(p, 'LOW_MORALE', STATUS_DEFINITIONS);
+                return `Status: Moral Baixa. (Ferreiros desmotivados)`;
+            } 
+        }
     }
 ];
 
@@ -261,7 +302,16 @@ const log = (message, className = '') => {
     const logDisplay = document.getElementById('log-display');
     const p = document.createElement('p');
     p.className = className;
-    p.innerHTML = message;
+    
+    // Prefixos baseados no personagem ativo
+    let prefix = '';
+    if (selectedCharacter && currentPlayer === 1) {
+        prefix = `<span class="log-event">[${selectedCharacter.name}]</span> `;
+    } else if (p2.charName && currentPlayer === 2) {
+        prefix = `<span class="log-war">[${p2.charName}]</span> `;
+    }
+    
+    p.innerHTML = prefix + message;
     logDisplay.prepend(p);
     while (logDisplay.children.length > 50) {
         logDisplay.removeChild(logDisplay.lastChild);
@@ -283,7 +333,21 @@ function setupEventListeners() {
     document.getElementById('recruit-button').addEventListener('click', () => { if (recruitAction(p1)) { updateUI(); checkGameOver(); } });
     document.getElementById('fortify-button').addEventListener('click', () => { if (fortifyAction(p1)) { updateUI(); checkGameOver(); } });
     document.getElementById('war-button').addEventListener('click', () => { if (warAction(p1, p2)) { updateUI(); checkGameOver(); } });
-    document.getElementById('special-ability-button').addEventListener('click', () => { if (specialAbilityAction(p1, p2)) { updateUI(); checkGameOver(); } });
+    document.getElementById('special-ability-button').addEventListener('click', () => { 
+        if (p1.ultimateCharge >= GAME_CONSTANTS.ULTIMATE_CHARGE_MAX) {
+            if (useUltimate(p1, p2)) { updateUI(); checkGameOver(); }
+        } else {
+            if (specialAbilityAction(p1, p2)) { updateUI(); checkGameOver(); } 
+        }
+    });
+    
+    // Listeners para Edificações
+    document.querySelectorAll('#p1-buildings .building-slot').forEach(slot => {
+        slot.addEventListener('click', () => {
+            const buildingId = slot.dataset.building;
+            buyBuilding(p1, buildingId);
+        });
+    });
     document.getElementById('reset-button').addEventListener('click', () => window.location.reload());
 }
 
@@ -376,6 +440,11 @@ function mineAction(p) {
     if (p.playerNumber === 1 && hasUpgrade(p, 'agri_tech')) {
         gainFood += 2;
     }
+
+    // Bônus do Moinho
+    if (p.buildings && p.buildings.includes('mill')) {
+        gainFood += 3;
+    }
     
     p.coins += gainCoins;
     p.food += gainFood;
@@ -395,6 +464,10 @@ function mineAction(p) {
     }
     
     log(logMsg);
+    
+    // Carregar Ultimate (Minerar dá 1 carga extra)
+    p.ultimateCharge = Math.min(GAME_CONSTANTS.ULTIMATE_CHARGE_MAX, p.ultimateCharge + 1);
+    
     playSound('gather');
     return true;
 }
@@ -418,16 +491,22 @@ function recruitAction(p) {
         gainArmy += 1;
     }
 
+    // Bônus do Quartel
+    if (p.buildings && p.buildings.includes('barracks')) {
+        gainArmy += 1;
+        // Redução de custo já tratada ou pode ser injetada no calculateCost
+    }
+
     if (hasStatus(p, 'LOW_MORALE')) {
         gainArmy = Math.max(1, gainArmy - 1);
     }
 
-    p.coins -= cost;
+    p.coins -= (p.buildings && p.buildings.includes('barracks')) ? Math.max(1, cost - 1) : cost;
     p.food -= foodCost;
     p.army += gainArmy;
     p.ap -= 1;
 
-    log(`<span class="log-positive">${p.name}</span> Recrutou Exército: -${cost} M, -${foodCost} C, +${gainArmy} Exército.`, 'log-positive');
+    log(`<span class="log-positive">${p.name}</span> Recrutou Exército: -${(p.buildings && p.buildings.includes('barracks')) ? Math.max(1, cost - 1) : cost} M, -${foodCost} C, +${gainArmy} Exército.`, 'log-positive');
     playSound('recruit');
     return true;
 }
@@ -468,7 +547,18 @@ function warAction(p, p_op) {
 
     p.ap -= 1;
     shakeElement('game-container');
-    playSound('war');
+    
+    // Gritos de Guerra e Efeitos de Guerra
+    if (window.audioSystem) {
+        window.audioSystem.playWar();
+        window.audioSystem.playWarCry();
+    }
+    if (window.visualEffects) {
+        window.visualEffects.playWarEffects();
+        if (selectedCharacter && p.playerNumber === 1) {
+            log(`⚔️ O ${selectedCharacter.name} avança com fúria!`, 'log-war');
+        }
+    }
 
     combatSystem.startCombat(p, p_op, (combatResult) => {
         processCombatResults(combatResult, p, p_op);
@@ -648,7 +738,10 @@ function endTurn() {
 
     if (currentPlayer === 1 && selectedCharacter.effect) {
         const charEffectMsg = selectedCharacter.effect(p);
-        if (charEffectMsg) logs.push(`Passivo de ${p.charName}: ${charEffectMsg}`);
+        if (charEffectMsg) {
+            logs.push(`Passivo de ${p.charName}: ${charEffectMsg}`);
+            if (window.visualEffects) window.visualEffects.playPassiveFeedback(selectedCharacter.id);
+        }
     }
     
     if (p.playerNumber === 1 && hasUpgrade(p, 'influence_boost')) {
@@ -662,6 +755,31 @@ function endTurn() {
             logs.push(`Status Inspiração: -1 Instabilidade.`);
         }
     });
+
+    // SISTEMA DE CLIMA (ESTAÇÕES)
+    if (currentPlayer === 1) {
+        turnsInSeason++;
+        if (turnsInSeason >= 5) {
+            turnsInSeason = 0;
+            const seasons = ['Primavera', 'Verão', 'Outono', 'Inverno'];
+            const currentIndex = seasons.indexOf(currentSeason);
+            currentSeason = seasons[(currentIndex + 1) % seasons.length];
+            log(`🍁 O clima mudou! Agora estamos no **${currentSeason}**.`, 'log-event');
+            if (window.visualEffects) window.visualEffects.applyWeather(currentSeason);
+        }
+    }
+
+    // Efeitos sazonais
+    if (currentSeason === 'Inverno') {
+        const extraFoodUpkeep = Math.floor(p.army * 0.5);
+        p.food -= extraFoodUpkeep;
+        logs.push(`<span class="log-negative">INVERNO:</span> Consumo extra de Comida: -${extraFoodUpkeep}.`);
+    } else if (currentSeason === 'Verão') {
+        if (p.mineCooldown === 0) {
+            p.coins += 1;
+            logs.push(`<span class="log-positive">VERÃO:</span> Bônus de Mineração: +1 Moeda.`);
+        }
+    }
 
     log(`--- Fim da Vez de ${p.name} (Turno ${turnCount}) ---`, 'log-turn');
     logs.reverse().forEach(msg => log(msg));
@@ -685,6 +803,93 @@ function endTurn() {
     if (currentPlayer === 2) {
         setTimeout(p2AIAction, 500);
     }
+}
+
+// --- FASE 2: NOVAS MECÂNICAS ---
+
+function buyBuilding(p, buildingId) {
+    if (p.playerNumber !== currentPlayer) return;
+    
+    // Importar constante localmente para garantir acesso
+    import('./shared/constants.js').then(({ BUILDINGS }) => {
+        const building = BUILDINGS.find(b => b.id === buildingId);
+        if (!building) return;
+
+        if (p.buildings.includes(buildingId)) {
+            log(`Você já possui o ${building.name}.`, 'log-negative');
+            return;
+        }
+
+        if (p.briks < building.cost) {
+            log(`Briks insuficientes para construir ${building.name} (Custo: ${building.cost} Briks).`, 'log-negative');
+            return;
+        }
+
+        p.briks -= building.cost;
+        p.buildings.push(buildingId);
+        
+        log(`<span class="log-event">${p.name}</span> construiu um **${building.name}**!`, 'log-positive');
+        playSound('build');
+        
+        if (window.visualEffects) {
+            window.visualEffects.playUltimateParticles('gold');
+            window.visualEffects.showAchievementToast('Nova Construção!', `Você agora possui um ${building.name}.`);
+        }
+        
+        updateUI();
+    });
+}
+
+function useUltimate(p, p_op) {
+    if (p.ultimateCharge < GAME_CONSTANTS.ULTIMATE_CHARGE_MAX) return false;
+    
+    let resultMsg = "";
+    let effectColor = 'rgba(255, 106, 0, 0.4)';
+
+    // Efeitos baseados no personagem
+    const charId = selectedCharacter ? selectedCharacter.id : 'rei';
+    
+    switch(charId) {
+        case 'rei':
+            p.army += 10;
+            p.food += 10;
+            resultMsg = "Chamado às Armas: +10 Exército e +10 Comida!";
+            effectColor = 'rgba(241, 196, 15, 0.5)';
+            break;
+        case 'bruxa':
+            p_op.ap = 0;
+            p_op.status.push('LOW_MORALE');
+            resultMsg = "Eclipse Místico: Inimigo perdeu todos os AP e ganhou Moral Baixa!";
+            effectColor = 'rgba(155, 89, 182, 0.6)';
+            break;
+        case 'ladrão':
+            const stolen = Math.floor(p_op.coins * 0.5);
+            p_op.coins -= stolen;
+            p.coins += stolen;
+            resultMsg = "O Grande Assalto: Roubou " + stolen + " moedas do oponente!";
+            effectColor = 'rgba(44, 62, 80, 0.7)';
+            break;
+        default:
+            p.ap += 2;
+            p.coins += 5;
+            resultMsg = "Supremacia Real: +2 AP e +5 Moedas!";
+    }
+
+    p.ultimateCharge = 0;
+    
+    log(`🔥 <span class="log-war">ULTIMATE DE ${p.charName} ATIVADA!</span> 🔥`, 'log-war');
+    log(resultMsg, 'log-event');
+    
+    if (window.visualEffects) {
+        window.visualEffects.playUltimateFlash(effectColor);
+        window.visualEffects.playUltimateParticles(charId === 'bruxa' ? 'magic' : 'fire');
+    }
+    
+    if (window.audioSystem) {
+        window.audioSystem.play('victory');
+    }
+
+    return true;
 }
 
 function rollNewMarketCards() {
@@ -737,10 +942,36 @@ function updateUI() {
             statusEl.appendChild(token);
         });
         
-        const indicator = document.getElementById(`p${num}-turn-indicator`);
         const isActive = num === currentPlayer;
         indicator.style.display = isActive ? 'block' : 'none';
         indicator.classList.toggle('active-pulse', isActive);
+
+        // Atualizar Edificações Visuais
+        const buildContainer = document.getElementById(`p${num}-buildings`);
+        if (buildContainer) {
+            buildContainer.querySelectorAll('.building-slot').forEach(slot => {
+                const bId = slot.dataset.building;
+                if (p.buildings.includes(bId)) {
+                    slot.classList.add('built');
+                } else {
+                    slot.classList.remove('built');
+                }
+            });
+        }
+
+        // Atualizar Barra de Ultimate
+        const ultFill = document.getElementById(`p${num}-ultimate-fill`);
+        if (ultFill) {
+            const ultPercent = (p.ultimateCharge / GAME_CONSTANTS.ULTIMATE_CHARGE_MAX) * 100;
+            ultFill.style.width = `${ultPercent}%`;
+            
+            const ultContainer = ultFill.parentElement;
+            if (p.ultimateCharge >= GAME_CONSTANTS.ULTIMATE_CHARGE_MAX) {
+                ultContainer.classList.add('ultimate-ready');
+            } else {
+                ultContainer.classList.remove('ultimate-ready');
+            }
+        }
     };
     
     updatePlayerUI(p1);
@@ -892,7 +1123,10 @@ function checkGameOver() {
         document.getElementById('end-turn-button').disabled = true;
         if (result.winner === p1) {
             p1.winCount++;
+            if (window.RankSystem) window.RankSystem.addWin();
             checkAchievements();
+        } else {
+            if (window.RankSystem) window.RankSystem.addLoss();
         }
         return true;
     }
@@ -907,6 +1141,12 @@ function checkAchievements() {
         if (!ach.unlocked && ach.check(p)) {
             ach.unlocked = true;
             log(ach.log, 'log-event log-positive');
+            
+            // Usar novo sistema de Toast
+            if (window.visualEffects) {
+                window.visualEffects.showAchievementToast('Conquista Desbloqueada!', ach.name);
+            }
+            
             unlockedCount++;
         }
     });

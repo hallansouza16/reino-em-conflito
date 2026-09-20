@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REINO EM CONFLITO - Tutorial</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/settings.css">
+    <link rel="stylesheet" href="css/effects.css">
+    <link rel="stylesheet" href="css/combat-styles.css">
+    <style>
+        .tutorial-container {
+            background-color: var(--color-bg);
+            border: 2px solid var(--color-border);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            max-width: 800px;
+            margin: 40px auto;
+            text-align: left;
+            color: var(--color-text);
+            position: relative;
+            z-index: 1;
+        }
+        .tutorial-container h2 {
+            text-align: center;
+            color: var(--color-accent);
+            border-bottom: 2px solid var(--color-border);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .tutorial-container h3 {
+            margin-top: 25px;
+            border-bottom: 1px dotted rgba(255,255,255,0.2);
+            padding-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="background-overlay"></div>
+    
+    <button class="back-btn" onclick="window.location.href='index.html'">← Voltar ao Menu</button>
+    
+    <div class="tutorial-container">
+        <h2>📜 GUIA DO MESTRE DE JOGO</h2>
+        
+        <h3 style="color: var(--color-gold);">1. Mecânicas Básicas</h3>
+        <p>• Você sempre tem <strong>1 AP</strong> (Ponto de Ação) por turno.</p>
+        <p>• Ações pesadas como <strong>Minerar</strong>, <strong>Recrutar</strong> ou <strong>Fortificar</strong> custam AP.</p>
+        <p>• <strong>Instabilidade:</strong> Evite que chegue ao Limite (10)! Se chegar, o povo se revolta e você perde a coroa. Cuidar dela custa influência ou cartas.</p>
+        <p>• <strong>Mercado Mágico:</strong> Use moedas para comprar cartas e frustrar os planos do adversário.</p>
+        
+        <h3 style="color: var(--color-shop);">2. Clima / Estações do Ano</h3>
+        <p>• A cada 5 rodadas a estação do ano muda, afetando as regras globais da partida:</p>
+        <p>• No <strong>Verão</strong>, a colheita é farta e você ganha mais Ouro e Comida ao minerar.</p>
+        <p>• No <strong>Inverno</strong>, a neve traz escassez e manter seu exército gasta bem mais suprimentos. Prepare seu estoque de comida!</p>
+
+        <h3 style="color: var(--color-army);">3. Edificações Permanentes</h3>
+        <p>• Jogando ativamente e vencendo guerras você junta 🧱 <strong>Briks</strong>.</p>
+        <p>• Use os Briks para construir maravilhas no seu reino:</p>
+        <p>🏰 <strong>Quartel</strong>: Tropas mais fortes e baratas.</p>
+        <p>🌾 <strong>Moinho</strong>: Mais passivas em comida e sustento.</p>
+        <p>🏛️ <strong>Academia</strong>: Pesquisas para o futuro do reino.</p>
+
+        <h3 style="color: var(--color-instability);">4. Habilidades Supremas (Ultimate)</h3>
+        <p>• Ao realizar grandes feitos pelo Reino (como plantar exaustivamente para sustentar o povo), você enche uma pequena Barra de Energia Secreta embaixo do seu perfil.</p>
+        <p>• Quando ela atingir o limite (10/10), ative sua <strong>Habilidade Especial Ultimate</strong> para desferir um efeito visual único que geralmente muda o rumo da guerra! O Efeito depende diretamente da personalidade do governante escolhido.</p>
+        
+        <div style="text-align: center; margin-top: 40px;">
+            <button class="menu-btn" onclick="window.location.href='singleplayer.html'">Testar Agora</button>
+        </div>
+    </div>
+
+    <!-- SISTEMAS BASE -->
+    <script src="js/main.js"></script>
+    <script type="module" src="js/visual-effects.js"></script>
+</body>
+</html>

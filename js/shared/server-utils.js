@@ -109,6 +109,8 @@ export function createPlayerState(characterId, playerNum) {
         mineCooldown: 0,
         status: [],
         upgrades: [],
+        buildings: [],
+        ultimateCharge: 0,
         name: `Jogador ${playerNum}`,
         charName: character.name,
         characterId: characterId,

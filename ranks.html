@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REINO EM CONFLITO - Histórico do Reino</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/settings.css">
+    <link rel="stylesheet" href="css/effects.css">
+    <link rel="stylesheet" href="css/combat-styles.css">
+    <style>
+        .ranks-container {
+            background-color: var(--color-bg);
+            border: 2px solid var(--color-border);
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            max-width: 600px;
+            margin: 60px auto;
+            text-align: center;
+            color: var(--color-text);
+            position: relative;
+            z-index: 1;
+        }
+        .ranks-container h2 {
+            color: var(--color-accent);
+            border-bottom: 2px solid var(--color-border);
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+        .rank-highlight {
+            font-size: 2.5em;
+            color: var(--color-gold);
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+        .rank-mmr {
+            font-size: 1.5em;
+            margin-bottom: 40px;
+        }
+        .stats-grid {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(0,0,0,0.3);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--color-border);
+        }
+        .stat-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            display: block;
+        }
+        .stat-wins .stat-value { color: var(--color-army); }
+        .stat-losses .stat-value { color: var(--color-instability); }
+        .stat-winrate .stat-value { color: var(--color-shop); }
+    </style>
+</head>
+<body>
+    <div class="background-overlay"></div>
+    
+    <button class="back-btn" onclick="window.location.href='index.html'">← Voltar ao Menu</button>
+    
+    <div class="ranks-container">
+        <h2>🏆 HISTÓRICO ESCUDEIRO</h2>
+        
+        <div class="rank-highlight" id="page-rank-name">---</div>
+        <p class="rank-mmr">MMR Atual: <strong id="page-rank-mmr">0</strong> pts</p>
+        
+        <div class="stats-grid">
+            <div class="stat-box stat-wins">
+                <span class="stat-value" id="page-rank-wins">0</span>
+                <span>Vitórias</span>
+            </div>
+            <div class="stat-box stat-losses">
+                <span class="stat-value" id="page-rank-losses">0</span>
+                <span>Derrotas</span>
+            </div>
+            <div class="stat-box stat-winrate">
+                <span class="stat-value" id="page-rank-winrate">0%</span>
+                <span>Taxa de Vitória</span>
+            </div>
+        </div>
+        
+        <div style="margin-top: 40px; color: var(--color-gray);">
+            <p>Jogue mais partidas (Singleplayer ou Multiplayer) para acumular MMR e subir sua patente!</p>
+        </div>
+    </div>
+
+    <!-- SCRIPT DE RANKING -->
+    <script src="js/rank-system.js"></script>
+    <script>
+        // Função local para não depender do modal original em rank-system.js
+        window.addEventListener('DOMContentLoaded', () => {
+            if (window.RankSystem) {
+                const stats = window.RankSystem.getStats();
+                const rankName = window.RankSystem.getRankName(stats.mmr);
+                
+                document.getElementById('page-rank-mmr').textContent = stats.mmr;
+                document.getElementById('page-rank-name').textContent = rankName;
+                document.getElementById('page-rank-wins').textContent = stats.wins;
+                document.getElementById('page-rank-losses').textContent = stats.losses;
+                
+                let winrate = 0;
+                let total = stats.wins + stats.losses;
+                if(total > 0) winrate = Math.round((stats.wins / total) * 100);
+                document.getElementById('page-rank-winrate').textContent = winrate + '%';
+            }
+        });
+    </script>
+</body>
+</html>

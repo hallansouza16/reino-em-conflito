@@ -46,6 +46,10 @@ class VisualEffects {
                 animation: scaleUpgrade 0.8s ease-out;
             }
 
+            .effect-aura-character {
+                animation: auraCharacter 2s infinite alternate;
+            }
+
             /* Animações */
             @keyframes pulseGold {
                 0%, 100% { 
@@ -126,6 +130,22 @@ class VisualEffects {
                 100% { transform: scale(1); }
             }
 
+            @keyframes auraCharacter {
+                0% { filter: drop-shadow(0 0 5px var(--color-gold)) brightness(1); }
+                100% { filter: drop-shadow(0 0 15px var(--color-gold)) brightness(1.2); }
+            }
+
+            /* Clima */
+            .weather-winter {
+                filter: sepia(0.2) saturate(0.8) brightness(0.9);
+                transition: filter 3s ease-in-out;
+            }
+
+            .weather-summer {
+                filter: saturate(1.2) brightness(1.1) contrast(1.1);
+                transition: filter 3s ease-in-out;
+            }
+
             /* Partículas */
             .particle {
                 position: absolute;
@@ -146,6 +166,12 @@ class VisualEffects {
             .particle-fire {
                 background: radial-gradient(circle, var(--color-fire) 0%, transparent 70%);
                 border-radius: 50%;
+            }
+
+            .particle-snow {
+                background: white;
+                border-radius: 50%;
+                filter: blur(1px);
             }
         `;
         document.head.appendChild(style);
@@ -183,6 +209,94 @@ class VisualEffects {
         this.applyEffectById('mine-button', 'pulse-gold', 1500);
         this.createParticles('mine-button', 'gold', 5);
         if (window.audioSystem) window.audioSystem.playActionMine();
+    }
+
+    // --- FASE 2: NOVOS EFEITOS ---
+
+    /**
+     * Exibe um toast animado de conquista
+     */
+    showAchievementToast(title, desc) {
+        const toast = document.getElementById('achievement-toast');
+        const titleEl = document.getElementById('toast-title');
+        const descEl = document.getElementById('toast-desc');
+
+        if (!toast || !titleEl || !descEl) return;
+
+        titleEl.textContent = title;
+        descEl.textContent = desc;
+
+        toast.classList.add('active');
+        
+        // Som de conquista
+        if (window.audioSystem) {
+            window.audioSystem.play('victory'); 
+        }
+
+        setTimeout(() => {
+            toast.classList.remove('active');
+        }, 5000);
+    }
+
+    /**
+     * Efeito de flash na tela toda para Ultimates
+     */
+    playUltimateFlash(color = 'rgba(255, 106, 0, 0.4)') {
+        const flash = document.getElementById('screen-flash');
+        if (!flash) return;
+
+        flash.style.backgroundColor = color;
+        flash.style.opacity = '1';
+        
+        setTimeout(() => {
+            flash.style.opacity = '0';
+        }, 500);
+    }
+
+    /**
+     * Partículas gigantes para Ultimate
+     */
+    playUltimateParticles(type, x = window.innerWidth / 2, y = window.innerHeight / 2) {
+        const colors = {
+            'fire': ['#ff6a00', '#f1c40f', '#e67e22'],
+            'magic': ['#9b55b5', '#8e44ad', '#3498db'],
+            'gold': ['#f1c40f', '#d4af37', '#ffffff']
+        };
+
+        const particleColors = colors[type] || colors.fire;
+        
+        for (let i = 0; i < 50; i++) {
+            const p = document.createElement('div');
+            p.className = 'particle';
+            p.style.backgroundColor = particleColors[Math.floor(Math.random() * particleColors.length)];
+            p.style.left = x + 'px';
+            p.style.top = y + 'px';
+            p.style.width = (Math.random() * 15 + 10) + 'px';
+            p.style.height = p.style.width;
+            p.style.borderRadius = '50%';
+            p.style.position = 'fixed';
+            p.style.zIndex = '10000';
+            p.style.pointerEvents = 'none';
+            p.style.boxShadow = `0 0 15px ${p.style.backgroundColor}`;
+            
+            document.body.appendChild(p);
+            
+            const angle = Math.random() * Math.PI * 2;
+            const dist = Math.random() * 500 + 100;
+            const tx = Math.cos(angle) * dist;
+            const ty = Math.sin(angle) * dist;
+            
+            p.animate([
+                { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+                { transform: `translate(${tx}px, ${ty}px) scale(0)`, opacity: 0 }
+            ], {
+                duration: 1500 + Math.random() * 1000,
+                easing: 'cubic-bezier(0.1, 0.5, 0.1, 1)'
+            }).onfinish = () => p.remove();
+        }
+    }
+
+    playActionMine() {
     }
 
     playRecruitEffects() {
@@ -267,6 +381,51 @@ class VisualEffects {
     playSelectCharacterEffects() {
         this.applyEffectById('character-grid', 'pulse-gold', 1500);
         if (window.audioSystem) window.audioSystem.playSelectCharacter();
+    }
+
+    // Novos Efeitos de Clima e Personagens
+    applyWeather(season) {
+        const overlay = document.querySelector('.background-overlay');
+        if (!overlay) return;
+
+        overlay.classList.remove('weather-winter', 'weather-summer');
+        
+        if (season === 'Inverno') {
+            overlay.classList.add('weather-winter');
+            this.createParticles('game-container', 'snow', 20);
+        } else if (season === 'Verão') {
+            overlay.classList.add('weather-summer');
+            this.createParticles('game-container', 'fire', 5); // Simular calor
+        }
+    }
+
+    playPassiveFeedback(charId) {
+        const targetId = 'p1-avatar';
+        switch(charId) {
+            case 'rei':
+                this.applyEffectById(targetId, 'sparkle-treasure', 1500);
+                this.createParticles(targetId, 'gold', 5);
+                break;
+            case 'rainha':
+                this.applyEffectById(targetId, 'float-magic', 1500);
+                this.createParticles(targetId, 'magic', 4);
+                break;
+            case 'ladrão':
+                this.applyEffectById('p1-currencies-display', 'pulse-gold', 1000);
+                this.createParticles('p1-currencies-display', 'gold', 3);
+                break;
+            case 'bruxa':
+                this.applyEffectById(targetId, 'aura-character', 2000);
+                this.createParticles(targetId, 'magic', 6);
+                break;
+            default:
+                this.applyEffectById(targetId, 'pulse-gold', 1000);
+        }
+    }
+
+    playSoldierShield() {
+        this.applyEffectById('p1-avatar', 'aura-character', 1500);
+        this.applyEffectById('p1-army-stat', 'pulse-gold', 1000);
     }
 
     // Sistema de partículas

@@ -70,6 +70,8 @@ function createGameState(player1Id, player2Id, player1Char, player2Char) {
         },
         currentPlayerId: player1Id,
         turnCount: 1,
+        currentSeason: 'Primavera',
+        turnsInSeason: 0,
         marketCards: rollMarketCards(),
         isGameOver: false,
         createdAt: new Date().toISOString()
@@ -144,6 +146,25 @@ function processUpkeep(player) {
     }
 }
 
+// Lógica de estação (clima)
+function processSeasonChanges(state) {
+    state.turnsInSeason++;
+    if (state.turnsInSeason >= 5) {
+        state.turnsInSeason = 0;
+        const seasons = ['Primavera', 'Verão', 'Outono', 'Inverno'];
+        const currentIndex = seasons.indexOf(state.currentSeason);
+        state.currentSeason = seasons[(currentIndex + 1) % seasons.length];
+    }
+    
+    // Penalidade do Inverno
+    if (state.currentSeason === 'Inverno') {
+        const currentPlayerId = state.currentPlayerId;
+        const player = state.playerStats[currentPlayerId];
+        const extraFoodUpkeep = Math.floor(player.army * 0.5);
+        player.food = Math.max(0, player.food - extraFoodUpkeep);
+    }
+}
+
 function endTurn(state, roomId) {
     const currentPlayerId = state.currentPlayerId;
     const otherPlayerId = Object.keys(state.playerStats).find(id => id !== currentPlayerId);
@@ -161,6 +182,16 @@ function endTurn(state, roomId) {
     state.currentPlayerId = otherPlayerId;
     state.turnCount++;
     
+    // Processar Clima (feito após a troca de turno para afetar o novo jogador no início do turno dele - na verdade, deve ser no turno do P1 para avançar a estação)
+    if (state.playerInfo[state.currentPlayerId].playerNum === 1) {
+        processSeasonChanges(state);
+    } else if (state.currentSeason === 'Inverno') {
+        // Se já for Inverno, aplicar a penalidade no P2 também
+        const p2 = state.playerStats[state.currentPlayerId];
+        const extraFoodUpkeep = Math.floor(p2.army * 0.5);
+        p2.food = Math.max(0, p2.food - extraFoodUpkeep);
+    }
+
     // Verificar fim de jogo
     const gameOverInfo = checkGameOver(state);
     if (gameOverInfo) {
@@ -284,7 +315,7 @@ io.on('connection', (socket) => {
         console.log(`[JOGADOR ENTROU] ${socket.id} entrou na sala ${roomId}`);
     });
     
-    socket.on('makeChoice', ({ roomId, choice, token }) => {
+    socket.on('makeChoice', ({ roomId, choice, token, choiceData }) => {
         const room = rooms[roomId];
         if (!room || !room.gameState) {
             socket.emit('error', { message: 'Sala ou jogo não encontrado' });
@@ -308,20 +339,35 @@ io.on('connection', (socket) => {
         switch (choice) {
             case 'mine':
                 if (player.ap >= 1 && player.mineCooldown === 0) {
-                    player.coins += 4;
-                    player.food += 5;
+                    let gainCoins = 4;
+                    let gainFood = 5;
+                    // Bônus do Verão
+                    if (state.currentSeason === 'Verão') gainCoins += 1;
+                    // Bônus de Upgrades e Construções
+                    if (player.buildings && player.buildings.includes('mill')) gainFood += 3;
+                    if (player.upgrades && player.upgrades.includes('agri_tech')) gainFood += 2;
+                    
+                    player.coins += gainCoins;
+                    player.food += gainFood;
                     player.ap -= 1;
                     player.mineCooldown = GAME_CONSTANTS.MINE_COOLDOWN_MAX;
+                    
+                    // Ultimate Charge
+                    player.ultimateCharge = Math.min(GAME_CONSTANTS.ULTIMATE_CHARGE_MAX, player.ultimateCharge + 1);
                     actionPerformed = true;
                 }
                 break;
                 
             case 'recruit':
-                const recruitCost = 3;
+                const recruitCost = (player.buildings && player.buildings.includes('barracks')) ? Math.max(1, 3 - 1) : 3;
                 if (player.ap >= 1 && player.coins >= recruitCost && player.food >= 3) {
+                    let gainArmy = 3;
+                    if (player.upgrades && player.upgrades.includes('royal_guard')) gainArmy += 1;
+                    if (player.buildings && player.buildings.includes('barracks')) gainArmy += 1;
+                    
                     player.coins -= recruitCost;
                     player.food -= 3;
-                    player.army += 3;
+                    player.army += gainArmy;
                     player.ap -= 1;
                     actionPerformed = true;
                 }
@@ -365,7 +411,59 @@ io.on('connection', (socket) => {
                     actionPerformed = true;
                 }
                 break;
+
+            case 'specialAbility':
+                if (player.ap >= 1) {
+                    const charObj = CHARACTERS.find(c => c.id === player.characterId);
+                    if (charObj && charObj.specialAbility) {
+                        const result = charObj.specialAbility(player, opponent);
+                        if (result) actionPerformed = true;
+                    }
+                }
+                break;
+
+            case 'useUltimate':
+                if (player.ultimateCharge >= GAME_CONSTANTS.ULTIMATE_CHARGE_MAX) {
+                    player.ultimateCharge = 0;
+                    const charId = player.characterId;
+                    switch(charId) {
+                        case 'rei':
+                            player.army += 10;
+                            player.food += 10;
+                            break;
+                        case 'bruxa':
+                            opponent.ap = 0;
+                            if(!opponent.status) opponent.status = [];
+                            opponent.status.push('LOW_MORALE');
+                            break;
+                        case 'ladrão':
+                            const stolen = Math.floor(opponent.coins * 0.5);
+                            opponent.coins -= stolen;
+                            player.coins += stolen;
+                            break;
+                        default:
+                            player.ap += 2;
+                            player.coins += 5;
+                    }
+                    actionPerformed = true;
+                }
+                break;
                 
+            case 'buyBuilding':
+                const buildingId = choiceData && choiceData.buildingId;
+                if (!buildingId) break;
+                
+                // Assuming GAME_CONSTANTS.BUILDINGS or similar isn't directly exposed in server-utils yet, but we can hardcode costs for now or import it correctly.
+                // Let's check GAME_CONSTANTS.BUILDINGS.
+                const building = GAME_CONSTANTS.BUILDINGS && GAME_CONSTANTS.BUILDINGS.find(b => b.id === buildingId);
+                
+                if (building && player.briks >= building.cost && !player.buildings.includes(buildingId)) {
+                    player.briks -= building.cost;
+                    player.buildings.push(buildingId);
+                    actionPerformed = true;
+                }
+                break;
+
             case 'endTurn':
                 endTurn(state, roomId);
                 return;

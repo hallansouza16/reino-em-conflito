@@ -8,7 +8,27 @@ export const shuffleArray = (array) => {
 };
 
 export const playSound = (type) => {
-    console.log(`[SOUND EFFECT]: ${type}`);
+    if (window.audioSystem) {
+        // Mapeamento de sons simples para métodos do AudioSystem
+        const soundMap = {
+            'gather': 'playActionMine',
+            'recruit': 'playActionRecruit',
+            'build': 'playActionFortify',
+            'war': 'playActionWar',
+            'impact': 'playActionWar',
+            'upgrade': 'playUpgrade',
+            'click': 'playClick',
+            'hover': 'playHover'
+        };
+        const method = soundMap[type];
+        if (method && typeof window.audioSystem[method] === 'function') {
+            window.audioSystem[method]();
+        } else {
+            window.audioSystem.play(type);
+        }
+    } else {
+        console.log(`[SOUND EFFECT]: ${type}`);
+    }
 };
 
 export const shakeElement = (elementId) => {

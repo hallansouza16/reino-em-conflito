@@ -47,6 +47,7 @@ let myPlayerNum = null;
 let selfId = null;
 let currentRoomId = null;
 let selectedCharacter = null;
+let currentServerState = null;
 
 // Sistema de Log
 const log = (message, className = '') => {
@@ -55,7 +56,14 @@ const log = (message, className = '') => {
 
     const p = document.createElement('p');
     p.className = className;
-    p.innerHTML = message;
+    
+    // Prefixos baseados no personagem ativo
+    let prefix = '';
+    if (selectedCharacter && (className.includes('log-positive') || className.includes('log-event') || !className)) {
+        prefix = `<span class="log-event">[${selectedCharacter.name}]</span> `;
+    }
+    
+    p.innerHTML = prefix + message;
     logDisplay.prepend(p);
     while (logDisplay.children.length > 50) {
         logDisplay.removeChild(logDisplay.lastChild);
@@ -109,12 +117,21 @@ function setupEventListeners() {
         const token = sessionStorage.getItem('reconnectToken');
         const roomId = sessionStorage.getItem('roomId');
         socket.emit('makeChoice', { roomId, choice: 'mine', token });
+        
+        if (window.visualEffects) window.visualEffects.playMineEffects();
+        if (selectedCharacter) {
+            if (selectedCharacter.id === 'ladrão') {
+                if (window.visualEffects) window.visualEffects.playPassiveFeedback('ladrão');
+            }
+        }
     });
 
     document.getElementById('recruit-button').addEventListener('click', () => {
         const token = sessionStorage.getItem('reconnectToken');
         const roomId = sessionStorage.getItem('roomId');
         socket.emit('makeChoice', { roomId, choice: 'recruit', token });
+        
+        if (window.visualEffects) window.visualEffects.playRecruitEffects();
     });
 
     document.getElementById('fortify-button').addEventListener('click', () => {
@@ -127,7 +144,47 @@ function setupEventListeners() {
         const token = sessionStorage.getItem('reconnectToken');
         const roomId = sessionStorage.getItem('roomId');
         socket.emit('makeChoice', { roomId, choice: 'war', token });
+        
+        if (window.visualEffects) window.visualEffects.playWarEffects();
+        if (window.audioSystem) window.audioSystem.playWarCry();
+        log(`⚔️ Você avança com fúria!`, 'log-war');
     });
+
+    const specialAbilityBtn = document.getElementById('special-ability-button');
+    if (specialAbilityBtn) {
+        specialAbilityBtn.addEventListener('click', () => {
+            const token = sessionStorage.getItem('reconnectToken');
+            const roomId = sessionStorage.getItem('roomId');
+            const charge = currentServerState?.playerStats?.[selfId]?.ultimateCharge || 0;
+            
+            if (charge >= GAME_CONSTANTS.ULTIMATE_CHARGE_MAX) {
+                socket.emit('makeChoice', { roomId, choice: 'useUltimate', token });
+            } else {
+                socket.emit('makeChoice', { roomId, choice: 'specialAbility', token });
+            }
+        });
+    }
+
+    // Listeners para Edificações
+    document.querySelectorAll('.buildings-container .building-slot').forEach(slot => {
+        slot.addEventListener('click', () => {
+            // Verificar se o container atual pertence ao jogador ativo (mesmo número)
+            const parentId = slot.parentElement.id; // p1-buildings ou p2-buildings
+            if (parentId !== `p${myPlayerNum}-buildings`) return;
+            
+            const buildingId = slot.dataset.building;
+            const token = sessionStorage.getItem('reconnectToken');
+            const roomId = sessionStorage.getItem('roomId');
+            
+            socket.emit('makeChoice', { 
+                roomId, 
+                choice: 'buyBuilding', 
+                token,
+                choiceData: { buildingId }
+            });
+        });
+    });
+
 
     document.getElementById('end-turn-button').addEventListener('click', () => {
         const token = sessionStorage.getItem('reconnectToken');
@@ -217,6 +274,7 @@ function updateGameState(state) {
     selfId = sessionStorage.getItem('selfId');
     if (!selfId || !state.playerInfo[selfId]) return;
     
+    currentServerState = state;
     myPlayerNum = state.playerInfo[selfId].playerNum;
     showScreen('game');
 
@@ -300,6 +358,48 @@ function updateGameState(state) {
             }
         }
         
+        // Atualizar Edificações Visuais
+        const buildContainer = document.getElementById(`p${pNum}-buildings`);
+        if (buildContainer) {
+            buildContainer.querySelectorAll('.building-slot').forEach(slot => {
+                const bId = slot.dataset.building;
+                if (playerStats.buildings && playerStats.buildings.includes(bId)) {
+                    slot.classList.add('built');
+                } else {
+                    slot.classList.remove('built');
+                }
+            });
+        }
+
+        // Atualizar Barra de Ultimate
+        const ultFill = document.getElementById(`p${pNum}-ultimate-fill`);
+        if (ultFill) {
+            const charge = playerStats.ultimateCharge || 0;
+            const ultPercent = (charge / GAME_CONSTANTS.ULTIMATE_CHARGE_MAX) * 100;
+            ultFill.style.width = `${ultPercent}%`;
+            
+            const ultContainer = ultFill.parentElement;
+            if (charge >= GAME_CONSTANTS.ULTIMATE_CHARGE_MAX) {
+                ultContainer.classList.add('ultimate-ready');
+            } else {
+                ultContainer.classList.remove('ultimate-ready');
+            }
+            
+            // Reação do botão do jogador atual
+            if (pNum === myPlayerNum) {
+                const specialBtn = document.getElementById('special-ability-button');
+                if (specialBtn) {
+                    if (charge >= GAME_CONSTANTS.ULTIMATE_CHARGE_MAX) {
+                        specialBtn.classList.add('ult-ready');
+                        specialBtn.innerHTML = '🔥 USAR ULTIMATE 🔥';
+                    } else {
+                        specialBtn.classList.remove('ult-ready');
+                        specialBtn.innerHTML = '✨ HABILIDADE ESPECIAL';
+                    }
+                }
+            }
+        }
+
         // Indicador de turno
         const indicator = document.getElementById(`p${pNum}-turn-indicator`);
         if (indicator) {
@@ -308,12 +408,23 @@ function updateGameState(state) {
         }
     }
     
-    // Informações gerais
+    // Informações gerais e Clima
     const turnCountEl = document.getElementById('turn-count-value');
     const rebellionEl = document.getElementById('rebellion-condition');
     
     if (turnCountEl) turnCountEl.textContent = state.turnCount;
     if (rebellionEl) rebellionEl.textContent = `Máx. Exército: ${REBELLION_ARMY_LIMIT}. Máx. Instabilidade: ${INSTABILITY_LIMIT}.`;
+
+    // Atualizar Efeitos Sazonais (Clima)
+    if (window.visualEffects && state.currentSeason) {
+        window.visualEffects.applyWeather(state.currentSeason);
+        
+        // Exibir clima atual no header pra multiplayer 
+        const titleEl = document.querySelector('.title');
+        if (titleEl) {
+            titleEl.textContent = `REINO EM CONFLITO - MULTIPLAYER (${state.currentSeason.toUpperCase()})`;
+        }
+    }
 
     // Atualizar ações do jogador atual
     const p = state.playerStats[selfId];
@@ -321,13 +432,20 @@ function updateGameState(state) {
     const recruitButton = document.getElementById('recruit-button');
     const fortifyButton = document.getElementById('fortify-button');
     const warButton = document.getElementById('war-button');
+    const specialAbilityButton = document.getElementById('special-ability-button');
     const endTurnButton = document.getElementById('end-turn-button');
     const shopButton = document.getElementById('shop-button');
 
     if (mineButton) mineButton.disabled = !isMyTurn || p.ap < 1 || p.mineCooldown > 0;
-    if (recruitButton) recruitButton.disabled = !isMyTurn || p.ap < 1 || p.coins < 3 || p.food < 3;
-    if (fortifyButton) fortifyButton.disabled = !isMyTurn || p.ap < 1 || p.coins < 4 || p.influence < 2;
+    
+    let baseRecruitCost = 3;
+    let baseFortifyCost = 4;
+    // Opcional: puxar custo real igual no singleplayer se basearmos em configs de passiva
+
+    if (recruitButton) recruitButton.disabled = !isMyTurn || p.ap < 1 || p.coins < baseRecruitCost || p.food < 3;
+    if (fortifyButton) fortifyButton.disabled = !isMyTurn || p.ap < 1 || p.coins < baseFortifyCost || p.influence < 2;
     if (warButton) warButton.disabled = !isMyTurn || p.army < 10;
+    if (specialAbilityButton) specialAbilityButton.disabled = !isMyTurn || p.ap < 1;
     if (endTurnButton) endTurnButton.disabled = !isMyTurn;
     if (shopButton) shopButton.disabled = !isMyTurn;
 
@@ -392,6 +510,13 @@ function checkAchievements(player) {
     ACHIEVEMENTS.forEach(ach => {
         if (!ach.unlocked && ach.check(player)) {
             ach.unlocked = true;
+            log(ach.log, 'log-event log-positive');
+            
+            // Usar novo sistema de Toast
+            if (window.visualEffects) {
+                window.visualEffects.showAchievementToast('Conquista Desbloqueada!', ach.name);
+            }
+            
             unlockedCount++;
         }
     });
@@ -527,6 +652,13 @@ socket.on('gameOver', ({ winner, reason }) => {
     
     if (winnerTitle) winnerTitle.textContent = isWinner ? "🎉 VOCÊ VENCEU! 🎉" : "💀 VOCÊ PERDEU! 💀";
     if (reasonText) reasonText.textContent = reason;
+    
+    // Atualizar Ranks!
+    if (isWinner) {
+        if (window.RankSystem) window.RankSystem.addWin();
+    } else {
+        if (window.RankSystem) window.RankSystem.addLoss();
+    }
     
     showScreen('gameOver');
 });

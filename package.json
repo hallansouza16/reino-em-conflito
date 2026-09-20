@@ -1,10 +1,10 @@
 {
-  "name": "multiplayer-game-server",
+  "name": "reino-em-conflito",
   "version": "1.0.0",
-  "description": "Servidor multiplayer para jogo estratégico",
+  "description": "Jogo de estrategia medieval por turnos - Singleplayer e Multiplayer online",
   "main": "server.js",
   "scripts": {
-    "start": "node server/serve.js",
+    "start": "node server/server.js",
     "dev": "node server/server.js"
   },
   "dependencies": {
@@ -20,6 +20,6 @@
     "socket.io",
     "strategy"
   ],
-  "author": "Seu Nome",
+  "author": "White Wolf",
   "license": "MIT"
 }

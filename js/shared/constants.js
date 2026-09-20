@@ -12,8 +12,15 @@ export const GAME_CONSTANTS = {
     MAX_STAT_DEFAULT: 20,
     MAX_STAT_RESOURCE: 30,
     EVENT_CHANCE: 0.25,
-    WAR_ARMY_BASE_ATTACK: 10
+    WAR_ARMY_BASE_ATTACK: 10,
+    ULTIMATE_CHARGE_MAX: 10
 };
+
+export const BUILDINGS = [
+    { id: 'barracks', name: 'Quartel', cost: 3, effect: 'Recrutamento custa -1 Moeda e fornece +1 Exército.', icon: '🏰' },
+    { id: 'mill', name: 'Moinho', cost: 2, effect: 'Mineração produz +3 Comida extra.', icon: '🌾' },
+    { id: 'academy', name: 'Academia', cost: 4, effect: 'Chance de +1 AP extra no início do turno (20%).', icon: '🏛️' }
+];
 
 export const STATUS_DEFINITIONS = {
     HIGH_TAXES: { name: 'Impostos Altos', type: 'debuff', icon: '💰↑', desc: 'Custo padrão de Moedas de todas as Ações e Cartas +1 M.' },

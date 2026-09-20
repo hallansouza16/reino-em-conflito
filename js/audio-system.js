@@ -37,7 +37,8 @@ class AudioSystem {
             // Especiais
             { id: 'magic', name: 'Magia', type: 'special', freq: 1200, dur: 0.9 },
             { id: 'treasure', name: 'Tesouro', type: 'special', freq: 1100, dur: 0.5 },
-            { id: 'celebration', name: 'Celebração', type: 'special', freq: 950, dur: 0.8 }
+            { id: 'celebration', name: 'Celebração', type: 'special', freq: 950, dur: 0.8 },
+            { id: 'war_cry', name: 'Grito de Guerra', type: 'special', freq: 650, dur: 0.6 }
         ];
 
         this.initAudioContext();
@@ -259,6 +260,10 @@ class AudioSystem {
     
     playCelebration() { 
         this.play('celebration', { volume: 0.6 }); 
+    }
+    
+    playWarCry() { 
+        this.play('war_cry', { volume: 0.8 }); 
     }
     
     playClick() { 
