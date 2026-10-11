@@ -3,9 +3,11 @@
   "version": "2.0.0",
   "description": "Reino em Conflito - Remaster",
   "main": "electron/main.js",
+  "engines": {"node": ">=18.0.0"},
   "scripts": {
     "start": "electron .",
-    "dev": "electron . --dev"
+    "dev": "electron . --dev",
+    "dist": "electron-builder"
   },
   "author": "White Wolf",
   "license": "MIT",

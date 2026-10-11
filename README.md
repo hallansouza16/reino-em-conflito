@@ -6,12 +6,23 @@ Remaster em Electron do jogo de estrategia medieval por turnos.
 
 Estrutura e engine prontos. Wiring do JS em andamento.
 
-## Como rodar
+## Rodar (dev)
 
 ```bash
 npm install
 npm start
 ```
+
+## Empacotar
+
+```bash
+npm run dist
+```
+
+## Requisitos
+
+- Node.js 18+
+- npm 9+
 
 ## Estrutura
 
